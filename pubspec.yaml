@@ -1,0 +1,40 @@
+name: pet_connect
+description: "App para localização de pets desaparecidos, com carteira de vacina, histórico médico e QR code de identificação."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Estado e navegação
+  flutter_riverpod:
+  go_router:
+
+  # Firebase
+  firebase_core:
+  firebase_auth:
+  cloud_firestore:
+  firebase_storage:
+
+  # QR code
+  qr_flutter:
+
+  # Utilitários
+  intl:
+  image_picker:
+  cached_network_image:
+
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

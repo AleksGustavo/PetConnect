@@ -1,0 +1,61 @@
+# Arquitetura — PetConnect
+
+## Stack
+
+- **Flutter** (Android + iOS)
+- **Firebase**: Authentication, Firestore, Storage (fotos), Cloud Functions (página pública do QR code), Hosting (opcional, para servir a página pública)
+- **Riverpod** para gerenciamento de estado e injeção de dependência
+- **go_router** para navegação e deep links (importante para a página/rota que o QR code pode acionar dentro do próprio app, se optarmos por complementar a página web com um deep link)
+- **qr_flutter** para geração de QR code no app
+
+## Por que feature-first
+
+O código em `lib/` é organizado por **feature** (auth, tutor, pet), não por tipo técnico (não há uma pasta `screens/` global misturando todas as telas). Cada feature tem:
+
+```
+features/<nome>/
+├── data/           # implementações concretas (Firestore, Storage)
+├── domain/         # modelos e interfaces de repositório (sem depender do Firebase)
+└── presentation/
+    ├── screens/    # telas (widgets de página completa)
+    ├── widgets/    # componentes menores reutilizados dentro da feature
+    └── providers/  # providers Riverpod que conectam domain + data à UI
+```
+
+Vantagens para este projeto:
+- Times/pessoas diferentes podem trabalhar em `auth`, `tutor` e `pet` com baixo conflito de merge.
+- A camada `domain` não conhece Firebase — facilita testes com repositórios falsos e uma eventual troca de backend.
+- Fica claro onde adicionar algo novo: uma nova tela de pet vai em `features/pet/presentation/screens`, não em uma pasta genérica `screens/` de 30 arquivos.
+
+## `lib/core`
+
+Código compartilhado entre features que não é específico de nenhuma delas: tema visual (`theme/`), constantes (`constants/`), tratamento de erro comum (`errors/`) e widgets genéricos (`widgets/`, ex: botão padrão, loading indicator).
+
+## `lib/routing`
+
+Configuração central do `go_router`: define as rotas (`/login`, `/cadastro`, `/home`, `/pet/:id`, etc.) e os *redirects*/guards que impedem acesso a rotas autenticadas sem sessão ativa (RF06, RNF12).
+
+## Fluxo de dados
+
+```
+UI (screens/widgets)
+  ↓ observa
+Providers Riverpod (presentation/providers)
+  ↓ chama
+Repositório (interface em domain/)
+  ↑ implementado por
+Repositório concreto (data/, usa Firebase SDK)
+```
+
+A UI nunca importa o Firebase SDK diretamente — sempre por meio de um repositório, mantendo a camada de apresentação testável e desacoplada.
+
+## Página pública do QR code
+
+É um serviço **separado** do app Flutter mobile: uma Cloud Function (ou app web leve) que roda no Firebase, fora do bundle do app. Ver decisão detalhada em `docs/seguranca.md`. Ela pode viver neste mesmo repositório (ex: pasta `functions/`, criada quando começarmos essa parte) ou em um repositório próprio — a decidir quando chegarmos lá.
+
+## Testes
+
+`test/features/<nome>/` espelha `lib/features/<nome>/`. Prioridade de testes:
+1. **Unitários** para regras de negócio em `domain/` (ex: cálculo de alerta de vacina vencida).
+2. **Testes de widget** para telas críticas (login, criação de pet).
+3. Repositórios têm interface própria justamente para permitir fakes nesses testes, sem precisar de um Firestore real.

@@ -1,0 +1,71 @@
+# Requisitos Funcionais — PetConnect
+
+Convenção: `RFxx` — identificador único, usado também para rastrear casos de teste (`docs/casos-de-teste.md`) e referenciar em Pull Requests.
+
+## Autenticação e conta
+
+| ID | Requisito |
+|----|-----------|
+| RF01 | O sistema deve permitir que um visitante crie uma conta de tutor com nome, e-mail e senha. |
+| RF02 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro. |
+| RF03 | O sistema deve impedir cadastro com e-mail já existente, informando erro claro. |
+| RF04 | O sistema deve permitir login com e-mail e senha. |
+| RF05 | O sistema deve permitir recuperação de senha via e-mail ("Esqueci minha senha"). |
+| RF06 | O sistema deve manter a sessão do tutor autenticado entre aberturas do app. |
+| RF07 | O sistema deve permitir logout. |
+| RF08 | O sistema deve permitir que o tutor edite os dados da própria conta (nome, foto, telefone). |
+| RF09 | O sistema deve permitir que o tutor exclua a própria conta, com confirmação explícita. |
+
+## Gestão de pets
+
+| ID | Requisito |
+|----|-----------|
+| RF10 | O sistema deve permitir que um tutor cadastre um ou mais pets (nome, espécie, raça, data de nascimento, foto). |
+| RF11 | O sistema deve listar, na tela inicial do tutor, todos os pets vinculados à sua conta. |
+| RF12 | O sistema deve exibir apenas os pets pertencentes ao tutor autenticado — nenhum outro tutor pode ver ou editar esses pets. |
+| RF13 | O sistema deve permitir editar os dados de um pet já cadastrado. |
+| RF14 | O sistema deve permitir excluir um pet, com confirmação explícita. |
+| RF15 | Ao abrir o perfil de um pet, o sistema deve mostrar apenas as informações daquele pet específico. |
+
+## QR Code
+
+| ID | Requisito |
+|----|-----------|
+| RF16 | O sistema deve gerar um QR code único para cada pet cadastrado, exibido no perfil do pet. |
+| RF17 | Ao ser escaneado por qualquer pessoa, o QR code deve abrir uma página web pública com informações do pet destinadas à sua identificação e devolução (nome, foto, espécie/raça, contato do tutor). |
+| RF18 | A página pública do QR code não deve exibir histórico médico completo nem dados de contato além do necessário para a devolução do pet. |
+| RF19 | O sistema deve permitir ao tutor regenerar o QR code de um pet (ex: em caso de suspeita de uso indevido do código anterior). |
+
+## Carteira de vacina
+
+| ID | Requisito |
+|----|-----------|
+| RF20 | O sistema deve permitir registrar vacinas aplicadas a um pet (nome da vacina, data de aplicação, data da próxima dose, veterinário/clínica). |
+| RF21 | O sistema deve listar as vacinas de um pet em ordem cronológica. |
+| RF22 | O sistema deve permitir editar e excluir um registro de vacina. |
+| RF23 | O sistema deve alertar o tutor quando a próxima dose de uma vacina estiver próxima ou vencida. |
+
+## Histórico médico
+
+| ID | Requisito |
+|----|-----------|
+| RF24 | O sistema deve permitir registrar entradas de histórico médico (data, descrição, veterinário, anexos como exames). |
+| RF25 | O sistema deve listar o histórico médico de um pet em ordem cronológica. |
+| RF26 | O sistema deve permitir editar e excluir uma entrada do histórico médico. |
+
+## Agendamento de consultas
+
+| ID | Requisito |
+|----|-----------|
+| RF27 | O sistema deve permitir agendar uma consulta veterinária para um pet (data/hora, veterinário/clínica, motivo). |
+| RF28 | O sistema deve listar consultas agendadas, distinguindo futuras, concluídas e canceladas. |
+| RF29 | O sistema deve permitir editar, cancelar e marcar uma consulta como realizada. |
+| RF30 | O sistema deve notificar o tutor sobre consultas agendadas próximas. |
+
+## Fora de escopo nesta fase
+
+- Chat entre tutor e quem encontrou o pet.
+- Geolocalização em tempo real do pet.
+- Múltiplos tutores compartilhando o mesmo pet (ex: casais, famílias).
+
+Esses itens podem voltar como requisitos futuros, mas não fazem parte da primeira versão.

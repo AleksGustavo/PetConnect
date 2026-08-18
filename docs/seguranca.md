@@ -1,0 +1,74 @@
+# Segurança — PetConnect
+
+## Autenticação
+
+- Autenticação via **Firebase Authentication** (e-mail/senha). Senhas nunca passam pelo nosso código em texto puro — o SDK do Firebase cuida do hashing/transporte.
+- Mensagens de erro de login devem ser genéricas ("e-mail ou senha inválidos"), sem indicar se o e-mail existe, para não facilitar enumeração de contas (ver CT05).
+- Recuperação de senha (RF05) sempre mostra a mesma mensagem de confirmação, exista ou não o e-mail informado (mesmo motivo).
+- Recomenda-se ativar **Firebase App Check** para reduzir abuso automatizado dos endpoints (login, Cloud Functions da página pública).
+
+## Autorização e isolamento de dados (Firestore Security Rules)
+
+Regra central: **um tutor só lê/escreve os próprios documentos**; dados de pet só são acessíveis pelo `tutorId` proprietário.
+
+Esboço de regras (a refinar quando a modelagem definitiva do Firestore for confirmada):
+
+```
+match /users/{userId} {
+  allow read, update, delete: if request.auth.uid == userId;
+  allow create: if request.auth.uid == userId;
+}
+
+match /pets/{petId} {
+  allow read, update, delete: if request.auth != null
+    && resource.data.tutorId == request.auth.uid;
+  allow create: if request.auth != null
+    && request.resource.data.tutorId == request.auth.uid;
+
+  match /vaccines/{vaccineId} {
+    allow read, write: if request.auth != null
+      && get(/databases/$(database)/documents/pets/$(petId)).data.tutorId == request.auth.uid;
+  }
+  // mesmo padrão para medicalHistory/{id} e appointments/{id}
+}
+```
+
+Nenhuma coleção de pet deve ter leitura pública direta pelo SDK do Firestore — ver seção seguinte sobre a página do QR code.
+
+## Página pública do QR code
+
+Como qualquer pessoa (sem login) precisa conseguir ver informações básicas de um pet ao escanear o QR (RF17), duas abordagens foram consideradas:
+
+1. **Regra de leitura pública em um campo/coleção específica no Firestore.** Simples, porém arriscado: qualquer ajuste futuro na regra pode acidentalmente expor mais do que o pretendido, e a coleção fica sujeita a enumeração de IDs por clientes Firestore genéricos.
+2. **Cloud Function (HTTP) que renderiza a página, lendo o Firestore com privilégios de admin e retornando apenas os campos permitidos.** Escolha recomendada — a superfície pública fica restrita a um endpoint controlado por código, não pelas regras gerais do banco.
+
+**Decisão**: opção 2. A Cloud Function recebe o ID do pet, busca o documento com Admin SDK (sem passar pelas regras de segurança do client) e retorna somente: nome, foto, espécie/raça, e contato do tutor (definido explicitamente por ele como "visível no QR code" — nunca o e-mail/senha, e telefone só se o tutor optar por exibi-lo).
+
+- IDs de pet usados na URL da página pública devem ser **não sequenciais e não adivinháveis** (IDs gerados pelo Firestore já são strings aleatórias — não usar contadores incrementais).
+- Se o pet for excluído ou o QR code regenerado (RF19), o endpoint deve responder "não encontrado" para o ID antigo (CT14, CT15).
+
+## Validação de entrada
+
+- Todo formulário (cadastro, criação de pet, vacina, histórico, consulta) valida no client antes de enviar, **e** as regras do Firestore validam tipo/presença dos campos obrigatórios no servidor — nunca confiar somente na validação do app.
+- Uploads de imagem (foto de pet) devem ter limite de tamanho e tipo de arquivo validados antes do upload ao Firebase Storage.
+
+## Dados sensíveis e LGPD
+
+- Dados coletados: nome/e-mail/telefone do tutor, dados do pet, histórico médico. Finalidade: identificação de pets perdidos e gestão de saúde do pet — deve constar em uma política de privacidade (fora do escopo desta fase, mas necessária antes de lançar).
+- O tutor decide explicitamente quais dados de contato aparecem na página pública do QR code (RF17/RF18) — nunca expor por padrão o histórico médico completo.
+- Exclusão de conta (RF09) deve remover ou anonimizar os dados do tutor e de seus pets, incluindo desativar o(s) QR code(s) associados.
+
+## Segredos e configuração
+
+- Chaves do Firebase (`google-services.json`, `GoogleService-Info.plist`, `firebase_options.dart` gerado por `flutterfire configure`) **não são segredos de altíssima sensibilidade** (a segurança real vem das Security Rules), mas ainda assim não devem ser commitadas com configurações de produção diferentes das de desenvolvimento sem necessidade — ver `.gitignore`.
+- Nenhuma credencial de serviço (Admin SDK, usada pela Cloud Function) deve estar no repositório; usar variáveis de ambiente/Secret Manager do Google Cloud.
+
+## Cenários de abuso a considerar
+
+| Cenário | Mitigação |
+|---|---|
+| Força bruta de login | Firebase Auth já limita tentativas; considerar App Check |
+| Enumeração de pets via QR | IDs não sequenciais + Cloud Function controlando o que é exposto |
+| Tutor A acessando pet do Tutor B via manipulação de rota no app | Firestore Security Rules bloqueiam no servidor, independente da UI (CT10) |
+| QR code fotografado/reutilizado indevidamente após perda de acesso ao pet (ex: pet vendido/doado) | Regeneração de QR code (RF19) invalida o anterior |
+| Scraping da página pública para coletar contatos em massa | Rate limiting na Cloud Function; considerar CAPTCHA se abuso for detectado |
