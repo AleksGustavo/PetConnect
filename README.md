@@ -31,8 +31,8 @@ flutter pub get
 flutter run
 ```
 
-Configuração do Firebase (arquivos de credenciais e `firebase_options.dart`) via [`flutterfire configure`](https://firebase.flutter.dev/docs/cli) — ainda não incluída neste repositório, pois depende do projeto Firebase ser criado.
+O projeto Firebase (`pet-connect-c53f1`) já existe, com as coleções `Usuarios`, `Pets` e `Localizacoes` em uso. Falta rodar [`flutterfire configure`](https://firebase.flutter.dev/docs/cli) para conectar este código Flutter a esse projeto (gera `firebase_options.dart`, não commitado — ver `.gitignore`).
 
 ## Status
 
-Projeto em fase inicial: estrutura de pastas e documentação definidas, aguardando modelagem de dados Firestore existente do time e o layout visual para começar a implementação das telas.
+Estrutura de pastas, documentação e modelo de dados reconciliados com o Firestore existente. Tela de login implementada seguindo o layout visual definido. Próximos passos: conectar ao Firebase (`flutterfire configure`), autenticação real, cadastro/gestão de pets.

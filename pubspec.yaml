@@ -21,6 +21,10 @@ dependencies:
   cloud_firestore:
   firebase_storage:
 
+  # Login social
+  google_sign_in:
+  flutter_facebook_auth:
+
   # QR code
   qr_flutter:
 

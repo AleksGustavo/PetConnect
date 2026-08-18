@@ -1,89 +1,96 @@
-# Modelo de Dados — Firestore (proposta inicial)
+# Modelo de Dados — Firestore
 
-> ⚠️ **A confirmar**: o usuário mencionou já ter uma modelagem de banco pronta que quer reaproveitar, mas ainda não foi compartilhada. O que segue é uma proposta de trabalho, alinhada aos requisitos funcionais, para não bloquear o início do projeto — deve ser reconciliada com a estrutura real assim que ela for compartilhada.
+Reconciliado com a estrutura real já existente no projeto Firebase (`pet-connect-c53f1`), a partir do console compartilhado. Nomes de coleção e campo seguem o que já está em produção — **em português**, como no banco original.
 
-## Coleções
+## Coleções existentes
 
-### `users/{uid}`
-Documento por tutor, com o mesmo ID do usuário no Firebase Auth (`uid`).
+### `Usuarios/{docId}`
 
+`docId` é o **UID do Firebase Auth** do usuário (ex: `4nMLz8EC9aeF0rEMJWykDvloOq92`).
+
+| Campo | Tipo (real) | Observação |
+|---|---|---|
+| `nome` | string | |
+| `email` | string | |
+| `telefone` | string | sem formatação (ex: `"19991562584"`) |
+| `dataNascimento` | string | formato `"dd/MM/yyyy"` — **não** é Timestamp do Firestore |
+| `genero` | string | ex: `"Homem"`, `"Mulher"` |
+| `foto` | string | URL do Firebase Storage |
+| `usuarioID` | string (UUID) | identificador interno, **diferente** do `docId`/UID do Auth |
+
+> ⚠️ **A confirmar com o usuário**: existem dois identificadores para o mesmo usuário — o `docId` da coleção (= UID do Firebase Auth) e o campo `usuarioID` (UUID gerado separadamente). Nos documentos de `Pets` já existentes, o campo `userId` parece referenciar o **`docId`/UID do Auth**, não o `usuarioID`. Precisamos confirmar se `usuarioID` tem algum uso específico (ex: em `Localizacoes`?) antes de decidir se ele é mantido, depreciado, ou se é a chave que deveria estar sendo usada em `Pets.userId`.
+
+### `Pets/{docId}`
+
+`docId` gerado automaticamente pelo Firestore (ex: `3RzQeA1w8KrAVfcCZjMi`).
+
+| Campo | Tipo (real) | Observação |
+|---|---|---|
+| `nome` | string | |
+| `especie` | string | |
+| `raca` | string | |
+| `cor` | string | |
+| `genero` | string | ex: `"Fêmea"`, `"Macho"` |
+| `porte` | string | ex: pequeno/médio/grande |
+| `peso` | string | ⚠️ armazenado como string no exemplo visto, não número |
+| `dataNascimento` | string | formato `"dd/MM/yyyy"`, pode ser vazio |
+| `dono` | string \| null | campo visto como `null` no exemplo — função ainda não confirmada (ver nota abaixo) |
+| `telefone` | string \| null | contato a exibir na página pública do QR code; se nulo, cai no `telefone` do usuário dono |
+| `userId` | string | referencia o `docId`/UID do usuário dono (ver nota acima) |
+| **`vacinado`** | boolean | **novo campo, adicionado nesta fase** — indica se o pet está vacinado (RF20-A) |
+
+> ⚠️ **A confirmar**: o campo `dono` parece redundante com `userId` (ambos apontariam para o tutor). Pode ser um campo legado, ou guardar o **nome** do dono de forma denormalizada (para exibir sem precisar buscar `Usuarios`) em vez do ID. Precisa confirmação antes de decidirmos se ele é usado, ignorado, ou removido.
+
+> **`vacinado`**: adicionado como um campo simples e direto no documento do pet, conforme solicitado. Documentos de `Pets` já existentes no banco **não** terão esse campo automaticamente — ele passa a ser preenchido para pets novos a partir de agora; para os já existentes, precisa de uma atualização manual ou um script de migração (podemos fazer isso quando formos tratar dados de teste/produção). Ainda cabe, no futuro, uma subcoleção `Pets/{petId}/vacinas` para o histórico detalhado de doses (nome da vacina, data, próxima dose) — este campo booleano é só o indicador rápido "vacinado: sim/não" pedido agora.
+
+### `Localizacoes/{docId}`
+
+Coleção identificada no console, mas **ainda sem os campos compartilhados**. Pelo nome e pelo propósito do app, a hipótese é que guarde registros de localização/avistamento de um pet (por exemplo, quando alguém que encontrou o pet reporta onde ele foi visto, possivelmente a partir da página pública do QR code). Isso não estava nos requisitos funcionais originais — se for esse o caso, é uma funcionalidade nova a formalizar (proposta: RF31 abaixo). **Preciso que você compartilhe a estrutura de um documento dessa coleção** para eu documentar corretamente e ajustar o diagrama de classes.
+
+## Proposta ainda não implementada no banco real
+
+As subcoleções abaixo fazem parte dos requisitos (carteira de vacina detalhada, histórico médico, consultas) mas **não existem ainda** na estrutura compartilhada — ficam como próximo passo de implementação, não como algo já existente a reconciliar:
+
+### `Pets/{petId}/vacinas/{vacinaId}` (detalhe, além do campo `vacinado`)
 ```json
 {
-  "name": "string",
-  "email": "string",
-  "phone": "string | null",
-  "photoUrl": "string | null",
-  "createdAt": "timestamp"
+  "nome": "string",
+  "dataAplicacao": "string (dd/MM/yyyy)",
+  "proximaDose": "string (dd/MM/yyyy) | null",
+  "veterinario": "string | null",
+  "observacoes": "string | null"
 }
 ```
 
-### `pets/{petId}`
-`petId` gerado automaticamente pelo Firestore (string aleatória — não sequencial, importante para a segurança do QR code).
-
+### `Pets/{petId}/historicoMedico/{registroId}`
 ```json
 {
-  "tutorId": "string (uid do tutor)",
-  "name": "string",
-  "species": "string",
-  "breed": "string",
-  "birthDate": "timestamp",
-  "photoUrl": "string | null",
-  "qrCodeId": "string",
-  "publicContact": {
-    "showPhone": "boolean",
-    "message": "string | null"
-  },
-  "createdAt": "timestamp"
+  "data": "string (dd/MM/yyyy)",
+  "descricao": "string",
+  "veterinario": "string | null",
+  "anexos": ["string (URL)"]
 }
 ```
 
-`qrCodeId` pode ser igual a `petId` ou um valor separado (útil se quisermos suportar "regenerar QR code" sem trocar o ID do pet — nesse caso, o `qrCodeId` muda, mas o `petId` permanece; a Cloud Function pública resolve por `qrCodeId`, não por `petId`, e valida se ele ainda é o vigente).
-
-### `pets/{petId}/vaccines/{vaccineId}`
-
+### `Pets/{petId}/consultas/{consultaId}`
 ```json
 {
-  "name": "string",
-  "appliedAt": "timestamp",
-  "nextDoseAt": "timestamp | null",
-  "vet": "string | null",
-  "notes": "string | null"
+  "data": "string (dd/MM/yyyy)",
+  "horario": "string | null",
+  "veterinario": "string",
+  "motivo": "string",
+  "status": "agendada | realizada | cancelada"
 }
 ```
 
-### `pets/{petId}/medicalHistory/{recordId}`
+## Convenção de datas
 
-```json
-{
-  "date": "timestamp",
-  "description": "string",
-  "vet": "string | null",
-  "attachmentUrls": ["string"]
-}
-```
-
-### `pets/{petId}/appointments/{appointmentId}`
-
-```json
-{
-  "date": "timestamp",
-  "vetName": "string",
-  "reason": "string",
-  "status": "scheduled | done | canceled"
-}
-```
-
-## Índices sugeridos
-
-- `pets`: índice composto em `tutorId` (para listar os pets de um tutor rapidamente — a query mais comum do app).
-- Subcoleções (`vaccines`, `medicalHistory`, `appointments`): ordenação por `date`/`appliedAt` já é suportada nativamente por serem subcoleções pequenas por pet, sem necessidade de índice composto adicional na maioria dos casos.
+O banco existente usa **strings no formato `dd/MM/yyyy`** para datas, não `Timestamp` do Firestore. Mantemos essa convenção nos novos campos/coleções para consistência, em vez de introduzir um formato diferente no meio do mesmo banco.
 
 ## Storage (fotos)
 
-Fotos de pet e do tutor ficam no **Firebase Storage**, não no Firestore (que não é feito para blobs grandes). Caminho sugerido: `pets/{petId}/photo.jpg`, `users/{uid}/photo.jpg`. A URL resultante é o que se salva em `photoUrl` nos documentos acima.
+Já em uso: `foto` em `Usuarios` e (presumivelmente) em `Pets` apontam para URLs do Firebase Storage no bucket `pet-connect-c53f1.appspot.com`.
 
-## Pontos a alinhar quando a modelagem existente do usuário for compartilhada
+## Índices sugeridos
 
-- Nomes de coleções/campos podem já estar definidos diferente do que está aqui.
-- Verificar se o usuário já tem uma estratégia própria para a página pública do QR code (campo específico, coleção separada, etc.).
-- Verificar se já existem dados de exemplo/seed que precisam ser importados.
+- `Pets`: índice em `userId` (listar os pets de um usuário é a query mais comum do app).

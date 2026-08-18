@@ -10,6 +10,8 @@ Convenção: `RFxx` — identificador único, usado também para rastrear casos 
 | RF02 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro. |
 | RF03 | O sistema deve impedir cadastro com e-mail já existente, informando erro claro. |
 | RF04 | O sistema deve permitir login com e-mail e senha. |
+| RF04-A | O sistema deve permitir login/cadastro via Google (Firebase Auth + Google Sign-In). |
+| RF04-B | O sistema deve permitir login/cadastro via Facebook (Firebase Auth + Facebook Login). |
 | RF05 | O sistema deve permitir recuperação de senha via e-mail ("Esqueci minha senha"). |
 | RF06 | O sistema deve manter a sessão do tutor autenticado entre aberturas do app. |
 | RF07 | O sistema deve permitir logout. |
@@ -41,6 +43,7 @@ Convenção: `RFxx` — identificador único, usado também para rastrear casos 
 | ID | Requisito |
 |----|-----------|
 | RF20 | O sistema deve permitir registrar vacinas aplicadas a um pet (nome da vacina, data de aplicação, data da próxima dose, veterinário/clínica). |
+| RF20-A | O perfil do pet deve indicar de forma simples e direta se ele está vacinado ou não (campo `vacinado`, booleano). |
 | RF21 | O sistema deve listar as vacinas de um pet em ordem cronológica. |
 | RF22 | O sistema deve permitir editar e excluir um registro de vacina. |
 | RF23 | O sistema deve alertar o tutor quando a próxima dose de uma vacina estiver próxima ou vencida. |
@@ -61,6 +64,15 @@ Convenção: `RFxx` — identificador único, usado também para rastrear casos 
 | RF28 | O sistema deve listar consultas agendadas, distinguindo futuras, concluídas e canceladas. |
 | RF29 | O sistema deve permitir editar, cancelar e marcar uma consulta como realizada. |
 | RF30 | O sistema deve notificar o tutor sobre consultas agendadas próximas. |
+
+## Localização (proposta — a confirmar)
+
+Existe uma coleção `Localizacoes` no Firestore já existente, cujos campos ainda não foram compartilhados. Hipótese de uso, a confirmar:
+
+| ID | Requisito |
+|----|-----------|
+| RF31 | *(proposto)* Quando alguém encontra um pet e acessa a página pública do QR code, o sistema pode permitir registrar a localização onde o pet foi visto. |
+| RF32 | *(proposto)* O tutor deve conseguir visualizar os registros de localização reportados para seu pet. |
 
 ## Fora de escopo nesta fase
 

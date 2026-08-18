@@ -10,7 +10,7 @@
 
 ## Por que feature-first
 
-O código em `lib/` é organizado por **feature** (auth, tutor, pet), não por tipo técnico (não há uma pasta `screens/` global misturando todas as telas). Cada feature tem:
+O código em `lib/` é organizado por **feature** (auth, usuario, pet), não por tipo técnico (não há uma pasta `screens/` global misturando todas as telas). Cada feature tem:
 
 ```
 features/<nome>/
@@ -23,7 +23,7 @@ features/<nome>/
 ```
 
 Vantagens para este projeto:
-- Times/pessoas diferentes podem trabalhar em `auth`, `tutor` e `pet` com baixo conflito de merge.
+- Times/pessoas diferentes podem trabalhar em `auth`, `usuario` e `pet` com baixo conflito de merge.
 - A camada `domain` não conhece Firebase — facilita testes com repositórios falsos e uma eventual troca de backend.
 - Fica claro onde adicionar algo novo: uma nova tela de pet vai em `features/pet/presentation/screens`, não em uma pasta genérica `screens/` de 30 arquivos.
 

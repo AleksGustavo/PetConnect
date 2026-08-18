@@ -1,77 +1,92 @@
 # Diagrama de Classes — PetConnect
 
-Modelos de domínio (`lib/features/*/domain`) e a camada de repositório que os acessa (`lib/features/*/data`). Nomes e campos exatos serão ajustados quando a modelagem de Firestore já existente do usuário for incorporada (ver `docs/modelo-dados-firestore.md`).
+Atualizado para refletir a estrutura real do Firestore já existente (`docs/modelo-dados-firestore.md`) — nomes de classe e campo em português, alinhados às coleções `Usuarios` e `Pets`.
 
 ```mermaid
 classDiagram
-    class Tutor {
+    class Usuario {
         +String id
-        +String name
+        +String usuarioID
+        +String nome
         +String email
-        +String? phone
-        +String? photoUrl
-        +DateTime createdAt
+        +String telefone
+        +String dataNascimento
+        +String genero
+        +String? foto
     }
 
     class Pet {
         +String id
-        +String tutorId
-        +String name
-        +String species
-        +String breed
-        +DateTime birthDate
-        +String? photoUrl
-        +String qrCodeId
-        +DateTime createdAt
+        +String userId
+        +String nome
+        +String especie
+        +String raca
+        +String cor
+        +String genero
+        +String porte
+        +String peso
+        +String dataNascimento
+        +String? dono
+        +String? telefone
+        +bool vacinado
     }
 
-    class Vaccine {
+    class Vacina {
         +String id
         +String petId
-        +String name
-        +DateTime appliedAt
-        +DateTime? nextDoseAt
-        +String? vet
-        +String? notes
+        +String nome
+        +String dataAplicacao
+        +String? proximaDose
+        +String? veterinario
+        +String? observacoes
     }
 
-    class MedicalRecord {
+    class RegistroMedico {
         +String id
         +String petId
-        +DateTime date
-        +String description
-        +String? vet
-        +List~String~ attachmentUrls
+        +String data
+        +String descricao
+        +String? veterinario
+        +List~String~ anexos
     }
 
-    class AppointmentStatus {
+    class StatusConsulta {
         <<enumeration>>
-        scheduled
-        done
-        canceled
+        agendada
+        realizada
+        cancelada
     }
 
-    class Appointment {
+    class Consulta {
         +String id
         +String petId
-        +DateTime date
-        +String vetName
-        +String reason
-        +AppointmentStatus status
+        +String data
+        +String? horario
+        +String veterinario
+        +String motivo
+        +StatusConsulta status
     }
 
-    class AuthRepository {
+    class Localizacao {
+        <<a confirmar>>
+        +String id
+        +String petId
+    }
+
+    class UsuarioRepository {
         <<interface>>
-        +signIn(email, password) Future~Tutor~
-        +signUp(name, email, password) Future~Tutor~
+        +signIn(email, senha) Future~Usuario~
+        +signUp(nome, email, senha) Future~Usuario~
+        +signInWithGoogle() Future~Usuario~
+        +signInWithFacebook() Future~Usuario~
         +sendPasswordReset(email) Future~void~
         +signOut() Future~void~
-        +currentUser() Stream~Tutor?~
+        +currentUser() Stream~Usuario?~
     }
 
     class PetRepository {
         <<interface>>
-        +watchPets(tutorId) Stream~List~Pet~~
+        +watchPets(userId) Stream~List~Pet~~
         +getPet(petId) Future~Pet~
         +createPet(pet) Future~String~
         +updatePet(pet) Future~void~
@@ -79,24 +94,24 @@ classDiagram
         +regenerateQrCode(petId) Future~String~
     }
 
-    class VaccineRepository {
+    class VacinaRepository {
         <<interface>>
-        +watchVaccines(petId) Stream~List~Vaccine~~
-        +addVaccine(vaccine) Future~void~
-        +updateVaccine(vaccine) Future~void~
-        +deleteVaccine(id) Future~void~
+        +watchVacinas(petId) Stream~List~Vacina~~
+        +addVacina(vacina) Future~void~
+        +updateVacina(vacina) Future~void~
+        +deleteVacina(id) Future~void~
     }
 
-    class MedicalRecordRepository {
+    class RegistroMedicoRepository {
         <<interface>>
-        +watchRecords(petId) Stream~List~MedicalRecord~~
-        +addRecord(record) Future~void~
+        +watchRegistros(petId) Stream~List~RegistroMedico~~
+        +addRegistro(registro) Future~void~
     }
 
-    class AppointmentRepository {
+    class ConsultaRepository {
         <<interface>>
-        +watchAppointments(petId) Stream~List~Appointment~~
-        +schedule(appointment) Future~void~
+        +watchConsultas(petId) Stream~List~Consulta~~
+        +schedule(consulta) Future~void~
         +updateStatus(id, status) Future~void~
     }
 
@@ -104,22 +119,26 @@ classDiagram
         -FirebaseFirestore firestore
     }
 
-    Tutor "1" --> "many" Pet : possui
-    Pet "1" --> "many" Vaccine : tem
-    Pet "1" --> "many" MedicalRecord : tem
-    Pet "1" --> "many" Appointment : tem
-    Appointment --> AppointmentStatus
+    Usuario "1" --> "many" Pet : possui
+    Pet "1" --> "many" Vacina : tem
+    Pet "1" --> "many" RegistroMedico : tem
+    Pet "1" --> "many" Consulta : tem
+    Pet "1" --> "many" Localizacao : recebe (a confirmar)
+    Consulta --> StatusConsulta
 
     PetRepository <|.. FirestorePetRepository : implementa
     PetRepository ..> Pet
-    VaccineRepository ..> Vaccine
-    MedicalRecordRepository ..> MedicalRecord
-    AppointmentRepository ..> Appointment
-    AuthRepository ..> Tutor
+    VacinaRepository ..> Vacina
+    RegistroMedicoRepository ..> RegistroMedico
+    ConsultaRepository ..> Consulta
+    UsuarioRepository ..> Usuario
 ```
 
 ## Notas
 
-- Repositórios são interfaces (`abstract class` em Dart) na camada `domain`, com implementação concreta usando Firestore na camada `data` — permite trocar a fonte de dados ou criar fakes para teste sem tocar na UI.
-- `Pet.qrCodeId` é o identificador usado na URL pública (não deve ser sequencial — ver `docs/seguranca.md`).
-- Providers Riverpod (camada `presentation/providers`) consomem essas interfaces, não as implementações concretas diretamente.
+- `Usuario.id` é o UID do Firebase Auth (mesmo valor do `docId` em `Usuarios`); `usuarioID` é um campo separado (UUID) já existente no banco — uso ainda a confirmar (ver `docs/modelo-dados-firestore.md`).
+- `Pet.dono` existe no banco real mas sua função é redundante com `userId` — mantido no modelo até confirmação, não usado nas regras de negócio por enquanto.
+- `Pet.vacinado` é o campo simples adicionado nesta fase. `Vacina` (subcoleção) é a proposta de histórico detalhado, ainda não implementada no banco.
+- `Localizacao` entra como classe provisória — estrutura real pendente de confirmação.
+- Datas são `String` (formato `dd/MM/yyyy`), seguindo a convenção já usada no banco existente, não `DateTime`/`Timestamp` nativos.
+- Repositórios são interfaces (`abstract class` em Dart) na camada `domain`, implementadas na camada `data` com Firestore.

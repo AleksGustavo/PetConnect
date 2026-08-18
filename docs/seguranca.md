@@ -2,34 +2,35 @@
 
 ## Autenticação
 
-- Autenticação via **Firebase Authentication** (e-mail/senha). Senhas nunca passam pelo nosso código em texto puro — o SDK do Firebase cuida do hashing/transporte.
+- Autenticação via **Firebase Authentication** (e-mail/senha, Google, Facebook). Senhas nunca passam pelo nosso código em texto puro — o SDK do Firebase cuida do hashing/transporte.
 - Mensagens de erro de login devem ser genéricas ("e-mail ou senha inválidos"), sem indicar se o e-mail existe, para não facilitar enumeração de contas (ver CT05).
 - Recuperação de senha (RF05) sempre mostra a mesma mensagem de confirmação, exista ou não o e-mail informado (mesmo motivo).
+- Login social (Google/Facebook, RF04-A/RF04-B) usa os SDKs oficiais (`google_sign_in`, `flutter_facebook_auth`) + Firebase Auth — o token do provedor é validado pelo Firebase, nunca confiamos em dados de perfil vindos direto do client sem essa validação.
 - Recomenda-se ativar **Firebase App Check** para reduzir abuso automatizado dos endpoints (login, Cloud Functions da página pública).
 
 ## Autorização e isolamento de dados (Firestore Security Rules)
 
-Regra central: **um tutor só lê/escreve os próprios documentos**; dados de pet só são acessíveis pelo `tutorId` proprietário.
+Regra central: **um tutor só lê/escreve os próprios documentos**; dados de pet só são acessíveis pelo `userId` proprietário (campo real já existente em `Pets`, ver `docs/modelo-dados-firestore.md`).
 
-Esboço de regras (a refinar quando a modelagem definitiva do Firestore for confirmada):
+Esboço de regras (a refinar quando o uso do campo `dono`/`usuarioID` for confirmado):
 
 ```
-match /users/{userId} {
+match /Usuarios/{userId} {
   allow read, update, delete: if request.auth.uid == userId;
   allow create: if request.auth.uid == userId;
 }
 
-match /pets/{petId} {
+match /Pets/{petId} {
   allow read, update, delete: if request.auth != null
-    && resource.data.tutorId == request.auth.uid;
+    && resource.data.userId == request.auth.uid;
   allow create: if request.auth != null
-    && request.resource.data.tutorId == request.auth.uid;
+    && request.resource.data.userId == request.auth.uid;
 
-  match /vaccines/{vaccineId} {
+  match /vacinas/{vacinaId} {
     allow read, write: if request.auth != null
-      && get(/databases/$(database)/documents/pets/$(petId)).data.tutorId == request.auth.uid;
+      && get(/databases/$(database)/documents/Pets/$(petId)).data.userId == request.auth.uid;
   }
-  // mesmo padrão para medicalHistory/{id} e appointments/{id}
+  // mesmo padrão para historicoMedico/{id} e consultas/{id}
 }
 ```
 

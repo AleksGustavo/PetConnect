@@ -29,7 +29,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-pubspec.lock
+# pubspec.lock É commitado (projeto é um app, não uma lib/pacote) — garante
+# que todo o time resolva exatamente as mesmas versões de dependência.
 
 # Symbolication related
 app.*.symbols
