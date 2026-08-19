@@ -116,6 +116,12 @@ class PetDetailScreen extends ConsumerWidget {
                   PetQrCode(pet: pet),
                   const SizedBox(height: 24),
                   _VacinaButton(petId: pet.id),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/pet/${pet.id}/historico'),
+                    icon: const Icon(Icons.medical_information_outlined, color: AppColors.textPrimary),
+                    label: const Text('HISTÓRICO MÉDICO', style: TextStyle(color: AppColors.textPrimary)),
+                  ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/pet/${pet.id}/editar', extra: pet),

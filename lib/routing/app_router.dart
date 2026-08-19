@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/cadastro_screen.dart';
 import '../features/auth/presentation/screens/esqueci_senha_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/pet/domain/historico_medico.dart';
 import '../features/pet/domain/pet.dart';
 import '../features/pet/domain/vacina.dart';
+import '../features/pet/presentation/screens/historico_form_screen.dart';
+import '../features/pet/presentation/screens/historico_list_screen.dart';
 import '../features/pet/presentation/screens/pet_detail_screen.dart';
 import '../features/pet/presentation/screens/pet_form_screen.dart';
 import '../features/pet/presentation/screens/vacina_form_screen.dart';
@@ -74,6 +77,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => VacinaFormScreen(
           petId: state.pathParameters['id']!,
           vacina: state.extra as Vacina?,
+        ),
+      ),
+      GoRoute(
+        path: '/pet/:id/historico',
+        builder: (context, state) => HistoricoListScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/pet/:id/historico/novo',
+        builder: (context, state) => HistoricoFormScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/pet/:id/historico/:historicoId/editar',
+        builder: (context, state) => HistoricoFormScreen(
+          petId: state.pathParameters['id']!,
+          historico: state.extra as HistoricoMedico?,
         ),
       ),
     ],
