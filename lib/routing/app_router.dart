@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/cadastro_screen.dart';
 import '../features/auth/presentation/screens/esqueci_senha_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/pet/domain/pet.dart';
+import '../features/pet/presentation/screens/pet_detail_screen.dart';
+import '../features/pet/presentation/screens/pet_form_screen.dart';
 import '../features/usuario/presentation/providers/auth_providers.dart';
 import '../features/usuario/presentation/screens/home_screen.dart';
 
@@ -42,6 +45,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/pet/novo',
+        builder: (context, state) => const PetFormScreen(),
+      ),
+      GoRoute(
+        path: '/pet/:id',
+        builder: (context, state) => PetDetailScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/pet/:id/editar',
+        builder: (context, state) => PetFormScreen(pet: state.extra as Pet?),
       ),
     ],
   );

@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../pet/presentation/providers/pet_providers.dart';
+import '../../../pet/presentation/widgets/pet_card.dart';
 import '../providers/auth_providers.dart';
 
-/// Placeholder da Home — lista de pets (RF11), criar pet e configurações
-/// de conta entram em uma próxima etapa. Por ora, confirma que o login
-/// funcionou e permite sair.
+/// Home do tutor: lista os pets vinculados à conta (RF11), com atalho para
+/// cadastrar um novo (RF10) e permitir sair.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usuarioAsync = ref.watch(currentUsuarioProvider);
+    final petsAsync = ref.watch(petsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -28,39 +31,74 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/pet/novo'),
+        backgroundColor: AppColors.brandDark,
+        tooltip: 'Cadastrar pet',
+        child: const Icon(Icons.add, color: AppColors.textOnBrand),
+      ),
       body: SafeArea(
-        child: Center(
-          child: usuarioAsync.when(
-            data: (usuario) => Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    usuario != null ? 'Bem-vindo, ${usuario.nome}!' : 'Bem-vindo!',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (usuario != null) ...[
-                    const SizedBox(height: 8),
-                    Text(usuario.email, style: const TextStyle(color: AppColors.textMuted)),
-                  ],
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Lista de pets — em breve',
-                    style: TextStyle(color: AppColors.textMuted),
-                  ),
-                ],
-              ),
-            ),
-            loading: () => const CircularProgressIndicator(),
-            error: (_, __) => const Text(
+        child: usuarioAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => const Center(
+            child: Text(
               'Não foi possível carregar seus dados.',
               style: TextStyle(color: AppColors.error),
             ),
+          ),
+          data: (usuario) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                child: Text(
+                  usuario != null ? 'Bem-vindo, ${usuario.nome}!' : 'Bem-vindo!',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: petsAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => const Center(
+                    child: Text(
+                      'Não foi possível carregar seus pets.',
+                      style: TextStyle(color: AppColors.error),
+                    ),
+                  ),
+                  data: (pets) {
+                    if (pets.isEmpty) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Text(
+                            'Você ainda não cadastrou nenhum pet.\nToque em "+" para começar.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AppColors.textMuted),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 96),
+                      itemCount: pets.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final pet = pets[index];
+                        return PetCard(
+                          pet: pet,
+                          onTap: () => context.push('/pet/${pet.id}'),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

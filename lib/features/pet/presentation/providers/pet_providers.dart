@@ -1,0 +1,29 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../usuario/presentation/providers/auth_providers.dart';
+import '../../data/firebase_pet_repository.dart';
+import '../../domain/pet.dart';
+import '../../domain/pet_repository.dart';
+
+final petRepositoryProvider = Provider<PetRepository>((ref) {
+  return FirebasePetRepository(firestore: ref.watch(firestoreProvider));
+});
+
+/// Pets do tutor autenticado (RF11). Vazio (sem emitir erro) enquanto
+/// deslogado — a rota já redireciona para o login nesse caso.
+///
+/// Depende de [currentUsuarioProvider] (não de [authStateChangesProvider]
+/// diretamente) porque `Usuario.id` já é o uid do Firebase Auth (ver
+/// docs/modelo-dados-firestore.md) e é um tipo simples de fake em testes,
+/// ao contrário do `User` do pacote firebase_auth.
+final petsProvider = StreamProvider<List<Pet>>((ref) {
+  final usuario = ref.watch(currentUsuarioProvider).valueOrNull;
+  if (usuario == null) return Stream.value(const []);
+  return ref.watch(petRepositoryProvider).watchPets(usuario.id);
+});
+
+/// Um pet específico pelo id (RF15). `family` porque a tela de detalhe/edição
+/// é reaberta com um id diferente a cada navegação.
+final petProvider = StreamProvider.family<Pet?, String>((ref, petId) {
+  return ref.watch(petRepositoryProvider).watchPet(petId);
+});
