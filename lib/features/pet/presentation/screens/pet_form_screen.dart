@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/br_date.dart';
+import '../../../../core/widgets/avatar_picker.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 import '../../domain/pet.dart';
+import '../providers/anexo_providers.dart';
 import '../providers/pet_providers.dart';
+
+const _tamanhoMaximoFoto = 5 * 1024 * 1024; // 5MB — ver docs/seguranca.md.
 
 const _generos = ['Macho', 'Fêmea'];
 const _portes = ['Pequeno', 'Médio', 'Grande'];
@@ -37,8 +42,10 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
   late String _genero = widget.pet?.genero.isNotEmpty == true ? widget.pet!.genero : _generos.first;
   late String _porte = widget.pet?.porte.isNotEmpty == true ? widget.pet!.porte : _portes.first;
   late bool _vacinado = widget.pet?.vacinado ?? false;
+  late String? _foto = widget.pet?.foto;
 
   bool _submitting = false;
+  bool _enviandoFoto = false;
   String? _error;
 
   @override
@@ -62,6 +69,37 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
     );
     if (picked != null) {
       _dataNascimentoController.text = formatBrDate(picked);
+    }
+  }
+
+  Future<void> _escolherFoto() async {
+    final arquivo = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (arquivo == null) return;
+
+    final bytes = await arquivo.readAsBytes();
+    if (bytes.length > _tamanhoMaximoFoto) {
+      setState(() => _error = 'A foto excede o tamanho máximo de 5MB.');
+      return;
+    }
+
+    final uid = ref.read(currentUsuarioProvider).valueOrNull?.id;
+    if (uid == null) return;
+
+    setState(() {
+      _error = null;
+      _enviandoFoto = true;
+    });
+
+    try {
+      final path = 'pets/fotos/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final url = await ref
+          .read(anexoRepositoryProvider)
+          .upload(path: path, bytes: bytes, contentType: 'image/jpeg');
+      if (mounted) setState(() => _foto = url);
+    } catch (_) {
+      if (mounted) setState(() => _error = 'Não foi possível enviar a foto. Tente novamente.');
+    } finally {
+      if (mounted) setState(() => _enviandoFoto = false);
     }
   }
 
@@ -91,6 +129,7 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
           peso: _pesoController.text.trim(),
           dataNascimento: _dataNascimentoController.text.trim(),
           vacinado: _vacinado,
+          foto: _foto,
         );
         await repository.createPet(novoPet);
       } else {
@@ -104,6 +143,7 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
           peso: _pesoController.text.trim(),
           dataNascimento: _dataNascimentoController.text.trim(),
           vacinado: _vacinado,
+          foto: _foto,
         ));
       }
       if (mounted) context.pop();
@@ -137,6 +177,14 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Center(
+                  child: AvatarPicker(
+                    fotoUrl: _foto,
+                    enviando: _enviandoFoto,
+                    onTap: _escolherFoto,
+                  ),
+                ),
+                const SizedBox(height: 24),
                 TextFormField(
                   controller: _nomeController,
                   decoration: const InputDecoration(hintText: 'Nome:'),

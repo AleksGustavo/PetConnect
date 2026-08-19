@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/historico_medico.dart';
+import '../providers/anexo_providers.dart';
 import '../providers/historico_medico_providers.dart';
 import '../widgets/historico_tile.dart';
 

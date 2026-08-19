@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/br_date.dart';
 import '../../domain/historico_medico.dart';
+import '../providers/anexo_providers.dart';
 import '../providers/historico_medico_providers.dart';
 
 const _tamanhoMaximoAnexo = 5 * 1024 * 1024; // 5MB — ver docs/seguranca.md.
