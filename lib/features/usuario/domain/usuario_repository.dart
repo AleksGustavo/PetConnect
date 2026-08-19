@@ -24,10 +24,13 @@ abstract class UsuarioRepository {
 
   Future<void> signOut();
 
-  /// Edita nome, telefone e foto do tutor autenticado (RF08).
+  /// Edita os dados do tutor autenticado (RF08).
   Future<void> updateUsuario({
     required String nome,
+    required String sobrenome,
     required String telefone,
+    required String dataNascimento,
+    required String genero,
     String? foto,
   });
 

@@ -109,7 +109,7 @@ class HomeScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
                   child: Text(
-                    usuario != null ? 'Bem-vindo, ${usuario.nome}!' : 'Bem-vindo!',
+                    usuario != null ? 'Bem-vindo, ${usuario.nomeCompleto}!' : 'Bem-vindo!',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
