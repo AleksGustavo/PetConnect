@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 import '../../domain/pet.dart';
 import '../providers/pet_providers.dart';
+import '../widgets/pet_qr_code.dart';
 
 /// Perfil de um único pet (RF15), com atalhos para editar (RF13) e excluir
 /// (RF14). Só mostra dados se o pet pertencer ao tutor autenticado — RF12,
@@ -109,6 +110,8 @@ class PetDetailScreen extends ConsumerWidget {
                     value: pet.vacinado ? 'Sim' : 'Não',
                     valueColor: pet.vacinado ? Colors.green : AppColors.error,
                   ),
+                  const SizedBox(height: 8),
+                  PetQrCode(pet: pet),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/pet/${pet.id}/editar', extra: pet),
