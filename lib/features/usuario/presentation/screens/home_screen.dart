@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../pet/presentation/providers/pet_providers.dart';
 import '../../../pet/presentation/widgets/pet_card.dart';
+import '../../domain/usuario.dart';
 import '../providers/auth_providers.dart';
 
 /// Home do tutor: lista os pets vinculados à conta (RF11), com atalho para
-/// cadastrar um novo (RF10), acessar configurações e sair.
+/// cadastrar um novo (RF10) e acessar configurações.
 ///
-/// A Home é a raiz da navegação autenticada — tanto o botão físico/gesto de
-/// voltar quanto o ícone de logout pedem confirmação antes de agir, para
-/// evitar fechar o app ou encerrar a sessão sem querer.
+/// A Home é a raiz da navegação autenticada — o botão físico/gesto de
+/// voltar não fecha o app: encerra a sessão (com confirmação) e volta ao
+/// login, mesmo fluxo do ícone de logout em Configurações.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  Future<bool> _confirmar(BuildContext context, {required String titulo, required String mensagem, required String confirmar}) async {
+  Future<void> _handleSair(BuildContext context, WidgetRef ref) async {
     final confirmou = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(titulo),
-        content: Text(mensagem),
+        title: const Text('Sair da conta'),
+        content: const Text('Tem certeza que deseja sair da sua conta?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -30,32 +30,12 @@ class HomeScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(confirmar),
+            child: const Text('Sair'),
           ),
         ],
       ),
     );
-    return confirmou ?? false;
-  }
-
-  Future<void> _handleSair(BuildContext context, WidgetRef ref) async {
-    final confirmou = await _confirmar(
-      context,
-      titulo: 'Sair da conta',
-      mensagem: 'Tem certeza que deseja sair da sua conta?',
-      confirmar: 'Sair',
-    );
-    if (confirmou) await ref.read(usuarioRepositoryProvider).signOut();
-  }
-
-  Future<void> _handleVoltar(BuildContext context) async {
-    final confirmou = await _confirmar(
-      context,
-      titulo: 'Sair do app',
-      mensagem: 'Tem certeza que deseja sair do PetConnect?',
-      confirmar: 'Sair',
-    );
-    if (confirmou) SystemNavigator.pop();
+    if (confirmou == true) await ref.read(usuarioRepositoryProvider).signOut();
   }
 
   @override
@@ -67,33 +47,10 @@ class HomeScreen extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        await _handleVoltar(context);
+        await _handleSair(context, ref);
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          title: const Text('Meus pets', style: TextStyle(color: AppColors.textPrimary)),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings_outlined, color: AppColors.textPrimary),
-              tooltip: 'Configurações',
-              onPressed: () => context.push('/configuracoes'),
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout, color: AppColors.textPrimary),
-              tooltip: 'Sair',
-              onPressed: () => _handleSair(context, ref),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => context.push('/pet/novo'),
-          backgroundColor: AppColors.brandDark,
-          tooltip: 'Cadastrar pet',
-          child: const Icon(Icons.add, color: AppColors.textOnBrand),
-        ),
+        backgroundColor: AppColors.homeBackdrop,
         body: SafeArea(
           child: usuarioAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -103,62 +60,251 @@ class HomeScreen extends ConsumerWidget {
                 style: TextStyle(color: AppColors.error),
               ),
             ),
-            data: (usuario) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                  child: Text(
-                    usuario != null ? 'Bem-vindo, ${usuario.nomeCompleto}!' : 'Bem-vindo!',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+            data: (usuario) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
                     ),
-                  ),
+                  ],
                 ),
-                Expanded(
-                  child: petsAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (_, __) => const Center(
-                      child: Text(
-                        'Não foi possível carregar seus pets.',
-                        style: TextStyle(color: AppColors.error),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                      child: _Cabecalho(usuario: usuario),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: _AdicionarPetCta(onTap: () => context.push('/pet/novo')),
+                    ),
+                    const SizedBox(height: 24),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Meus Pets',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                       ),
                     ),
-                    data: (pets) {
-                      if (pets.isEmpty) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(24),
-                            child: Text(
-                              'Você ainda não cadastrou nenhum pet.\nToque em "+" para começar.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: AppColors.textMuted),
-                            ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: petsAsync.when(
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (_, __) => const Center(
+                          child: Text(
+                            'Não foi possível carregar seus pets.',
+                            style: TextStyle(color: AppColors.error),
                           ),
-                        );
-                      }
+                        ),
+                        data: (pets) {
+                          if (pets.isEmpty) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: Text(
+                                  'Você ainda não cadastrou nenhum pet.\nToque em "Adicionar Novo Pet" para começar.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: AppColors.textMuted),
+                                ),
+                              ),
+                            );
+                          }
 
-                      return ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 96),
-                        itemCount: pets.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final pet = pets[index];
-                          return PetCard(
-                            pet: pet,
-                            onTap: () => context.push('/pet/${pet.id}'),
+                          return ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                            itemCount: pets.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final pet = pets[index];
+                              return PetCard(
+                                pet: pet,
+                                colorIndex: index,
+                                onTap: () => context.push('/pet/${pet.id}'),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: _RodapeInfo(),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Cabecalho extends StatelessWidget {
+  const _Cabecalho({required this.usuario});
+
+  final Usuario? usuario;
+
+  @override
+  Widget build(BuildContext context) {
+    final primeiroNome = usuario != null && usuario!.nome.isNotEmpty
+        ? usuario!.nome.trim().split(' ').first
+        : null;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          radius: 32,
+          backgroundColor: AppColors.background,
+          backgroundImage: usuario?.foto != null ? NetworkImage(usuario!.foto!) : null,
+          child: usuario?.foto == null
+              ? const Icon(Icons.person, size: 32, color: AppColors.brandMedium)
+              : null,
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                primeiroNome != null ? 'Olá, $primeiroNome!' : 'Olá!',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Selecione um pet para acessar o perfil',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        _BotaoCircular(
+          icon: Icons.settings_outlined,
+          tooltip: 'Configurações',
+          onTap: () => context.push('/configuracoes'),
+        ),
+      ],
+    );
+  }
+}
+
+class _BotaoCircular extends StatelessWidget {
+  const _BotaoCircular({required this.icon, required this.tooltip, required this.onTap});
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.background,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, color: AppColors.textPrimary, size: 22),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdicionarPetCta extends StatelessWidget {
+  const _AdicionarPetCta({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFE8F5E9),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: const Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.add, color: Color(0xFF43A047)),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Adicionar Novo Pet',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2E7D32),
+                      ),
+                    ),
+                    Text(
+                      'Cadastre um novo pet no app',
+                      style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward, color: Color(0xFF43A047)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RodapeInfo extends StatelessWidget {
+  const _RodapeInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.homeBackdrop,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.verified_user_outlined, color: Color(0xFF43A047), size: 20),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Seus pets, cuidados e momentos especiais, todos em um só lugar.',
+              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+            ),
+          ),
+          Icon(Icons.favorite, color: Color(0xFF43A047), size: 18),
+        ],
       ),
     );
   }

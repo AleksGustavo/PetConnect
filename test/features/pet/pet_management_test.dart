@@ -85,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Volta para a Home e o pet aparece na lista (RF11).
-    expect(find.text('Meus pets'), findsOneWidget);
+    expect(find.text('Meus Pets'), findsOneWidget);
     expect(find.text('Rex'), findsOneWidget);
     expect(find.textContaining('Você ainda não cadastrou'), findsNothing);
 
@@ -118,7 +118,7 @@ void main() {
     await tester.tap(find.text('Excluir'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Meus pets'), findsOneWidget);
+    expect(find.text('Meus Pets'), findsOneWidget);
     expect(find.textContaining('Você ainda não cadastrou nenhum pet'), findsOneWidget);
   });
 }

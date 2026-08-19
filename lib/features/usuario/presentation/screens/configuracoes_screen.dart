@@ -16,6 +16,27 @@ class ConfiguracoesScreen extends ConsumerStatefulWidget {
 class _ConfiguracoesScreenState extends ConsumerState<ConfiguracoesScreen> {
   bool _excluindo = false;
 
+  Future<void> _handleSair() async {
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair da conta'),
+        content: const Text('Tem certeza que deseja sair da sua conta?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+    if (confirmou == true) await ref.read(usuarioRepositoryProvider).signOut();
+  }
+
   Future<void> _confirmarExclusaoConta() async {
     final confirmou = await showDialog<bool>(
       context: context,
@@ -87,6 +108,12 @@ class _ConfiguracoesScreenState extends ConsumerState<ConfiguracoesScreen> {
                   subtitle: const Text('Nome, telefone e foto', style: TextStyle(color: AppColors.textMuted)),
                   trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
                   onTap: () => context.push('/configuracoes/editar-perfil', extra: usuario),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: AppColors.textPrimary),
+                  title: const Text('Sair da conta', style: TextStyle(color: AppColors.textPrimary)),
+                  onTap: _handleSair,
                 ),
                 const Divider(height: 1),
                 ListTile(

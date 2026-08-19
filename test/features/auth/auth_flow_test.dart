@@ -16,6 +16,7 @@ void main() {
   final timestamp = DateTime.now().millisecondsSinceEpoch;
   final testEmail = 'qa.petconnect.$timestamp@example.com';
   const testNome = 'QA PetConnect';
+  const testPrimeiroNome = 'QA';
   const testSenha = 'senha123';
 
   setUpAll(() async {
@@ -30,6 +31,17 @@ void main() {
       await user.delete();
     }
   });
+
+  Future<void> logout(WidgetTester tester) async {
+    // Sair não fica mais num ícone na Home — é preciso entrar em
+    // Configurações primeiro (mesmo fluxo do botão de voltar da Home).
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sair da conta'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Sair'));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+  }
 
   testWidgets('cadastro -> home -> logout -> login -> senha errada', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: PetConnectApp()));
@@ -53,15 +65,11 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'CRIAR CONTA'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    expect(find.text('Meus pets'), findsOneWidget, reason: 'cadastro deveria levar direto para a Home');
-    expect(find.textContaining('Bem-vindo, $testNome'), findsOneWidget,
-        reason: 'Home deveria mostrar o nome do usuário recém-cadastrado');
-    expect(find.text(testEmail), findsOneWidget, reason: 'Home deveria mostrar o e-mail do usuário');
+    expect(find.text('Meus Pets'), findsOneWidget, reason: 'cadastro deveria levar direto para a Home');
+    expect(find.textContaining('Olá, $testPrimeiroNome'), findsOneWidget,
+        reason: 'Home deveria saudar o usuário recém-cadastrado pelo primeiro nome');
 
-    await tester.tap(find.byIcon(Icons.logout));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(TextButton, 'Sair'));
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await logout(tester);
 
     expect(find.text('Login'), findsOneWidget, reason: 'logout deveria voltar para a tela de login');
 
@@ -72,12 +80,10 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'ENTRAR'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    expect(find.text('Meus pets'), findsOneWidget, reason: 'login com credenciais corretas deveria voltar para a Home');
+    expect(find.text('Meus Pets'), findsOneWidget,
+        reason: 'login com credenciais corretas deveria voltar para a Home');
 
-    await tester.tap(find.byIcon(Icons.logout));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(TextButton, 'Sair'));
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await logout(tester);
 
     final loginFields2 = find.byType(TextField);
     await tester.enterText(loginFields2.at(0), testEmail);

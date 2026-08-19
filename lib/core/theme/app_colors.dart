@@ -22,4 +22,24 @@ abstract final class AppColors {
     end: Alignment.bottomRight,
     colors: [brandDark, brandLight],
   );
+
+  /// Fundo claro atrás do card branco da Home (RF11), inspirado no mockup
+  /// enviado pelo usuário.
+  static const Color homeBackdrop = Color(0xFFEEF1FA);
+
+  /// Paleta cíclica dos cards de pet na Home — fundo pastel + cor de
+  /// destaque (selo de espécie, badge de gênero, botão de seta), uma
+  /// combinação por índice na lista.
+  static const List<Color> petCardBackgrounds = [
+    Color(0xFFEDE7F6),
+    Color(0xFFFFF3E0),
+    Color(0xFFE8F5E9),
+    Color(0xFFE3F2FD),
+  ];
+  static const List<Color> petCardAccents = [
+    Color(0xFF7E57C2),
+    Color(0xFFFB8C00),
+    Color(0xFF43A047),
+    Color(0xFF1E88E5),
+  ];
 }

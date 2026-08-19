@@ -14,3 +14,17 @@ DateTime? parseBrDate(String value) {
 }
 
 String formatBrDate(DateTime date) => _formatter.format(date);
+
+/// Idade em anos completos a partir de uma data de nascimento `dd/MM/yyyy`,
+/// ou `null` se a data estiver vazia/inválida.
+int? idadeEmAnos(String dataNascimento, {DateTime? agora}) {
+  final nascimento = parseBrDate(dataNascimento);
+  if (nascimento == null) return null;
+
+  final hoje = agora ?? DateTime.now();
+  var idade = hoje.year - nascimento.year;
+  final aniversarioJaPassouEsteAno =
+      hoje.month > nascimento.month || (hoje.month == nascimento.month && hoje.day >= nascimento.day);
+  if (!aniversarioJaPassouEsteAno) idade--;
+  return idade < 0 ? null : idade;
+}
