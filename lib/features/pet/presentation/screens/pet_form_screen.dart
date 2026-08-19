@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/br_date.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 import '../../domain/pet.dart';
 import '../providers/pet_providers.dart';
@@ -53,7 +53,7 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
   }
 
   Future<void> _pickDataNascimento() async {
-    final initial = _parseData(_dataNascimentoController.text) ?? DateTime(2020);
+    final initial = parseBrDate(_dataNascimentoController.text) ?? DateTime(2020);
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
@@ -61,16 +61,7 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      _dataNascimentoController.text = DateFormat('dd/MM/yyyy').format(picked);
-    }
-  }
-
-  DateTime? _parseData(String value) {
-    if (value.isEmpty) return null;
-    try {
-      return DateFormat('dd/MM/yyyy').parseStrict(value);
-    } catch (_) {
-      return null;
+      _dataNascimentoController.text = formatBrDate(picked);
     }
   }
 
