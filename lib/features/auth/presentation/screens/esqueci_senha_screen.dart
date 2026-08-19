@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/auth_header.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 
 class EsqueciSenhaScreen extends ConsumerStatefulWidget {
@@ -49,50 +51,65 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text('Esqueci minha senha', style: TextStyle(color: AppColors.textPrimary)),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        bottom: false,
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Informe o e-mail da sua conta para receber um link de redefinição de senha.',
-                style: TextStyle(color: AppColors.textMuted),
+              AuthHeader(onBack: () => context.pop()),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Esqueceu sua senha?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Informe o e-mail da sua conta para receber um link de redefinição de senha.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textMuted),
+                    ),
+                    const SizedBox(height: 24),
+                    if (_enviado)
+                      const Text(
+                        'Se esse e-mail estiver cadastrado, você vai receber um link de redefinição em instantes.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AppColors.textPrimary),
+                      )
+                    else ...[
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(hintText: 'E-mail:'),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _submitting ? null : _handleEnviar,
+                        child: _submitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.textOnBrand,
+                                ),
+                              )
+                            : const Text('ENVIAR'),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              if (_enviado)
-                const Text(
-                  'Se esse e-mail estiver cadastrado, você vai receber um link de redefinição em instantes.',
-                  style: TextStyle(color: AppColors.textPrimary),
-                )
-              else ...[
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(hintText: 'E-mail:'),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _submitting ? null : _handleEnviar,
-                  child: _submitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.textOnBrand,
-                          ),
-                        )
-                      : const Text('ENVIAR'),
-                ),
-              ],
             ],
           ),
         ),

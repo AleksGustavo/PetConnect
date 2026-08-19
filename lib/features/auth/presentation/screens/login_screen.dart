@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/auth_error_translator.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/auth_header.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -54,14 +55,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _Header(),
+              const AuthHeader(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                 child: Transform.translate(
@@ -93,49 +94,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-class _Header extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-      decoration: const BoxDecoration(
-        gradient: AppColors.brandGradient,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(48),
-          bottomRight: Radius.circular(48),
-        ),
-      ),
-      child: Column(
-        children: [
-          Image.asset(
-            'assets/images/logo.png',
-            width: 160,
-            height: 160,
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'PetConnect',
-            style: TextStyle(
-              color: AppColors.textOnBrand,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Conectando corações perdidos aos seus lares',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textOnBrand,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _LoginCard extends StatelessWidget {
   const _LoginCard({
     required this.emailController,
@@ -158,7 +116,7 @@ class _LoginCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
