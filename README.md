@@ -49,7 +49,8 @@ Além disso, centraliza para o tutor:
 | Carteira de vacina (registro, listagem, edição, exclusão, alerta visual) | ✅ Concluído | RF20–RF23 |
 | Histórico médico (com anexos no Cloudinary) | ✅ Concluído | RF24–RF26 |
 | Agendamento de consultas (agendar, listar por status, cancelar, marcar realizada, alerta visual) | ✅ Concluído | RF27–RF30 |
-| Localização (a confirmar) | ⬜ Proposto | RF31–RF32 |
+| Localização — tutor registra/visualiza avistamentos | ✅ Concluído | RF32 |
+| Localização — relato direto por quem encontrou o pet (via QR code) | ⬜ Bloqueado por RF17–RF19 | RF31 |
 
 Veja a lista completa de requisitos em [`docs/requisitos-funcionais.md`](docs/requisitos-funcionais.md).
 
@@ -124,4 +125,4 @@ Ordem planejada para as próximas entregas, uma feature por Pull Request:
 3. ✅ ~~Carteira de vacina (RF20–RF23)~~
 4. ✅ ~~Histórico médico (RF24–RF26)~~
 5. ✅ ~~Agendamento de consultas (RF27–RF30)~~
-6. 📍 Localização (RF31–RF32, escopo a confirmar)
+6. 📍 Localização: ✅ ~~tutor registra/visualiza avistamentos (RF32)~~ · relato direto pelo QR code (RF31) depende do item 2

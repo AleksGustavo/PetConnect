@@ -44,9 +44,9 @@ Reconciliado com a estrutura real já existente no projeto Firebase (`pet-connec
 
 > **`vacinado`**: adicionado como um campo simples e direto no documento do pet, conforme solicitado. Documentos de `Pets` já existentes no banco **não** terão esse campo automaticamente — ele passa a ser preenchido para pets novos a partir de agora; para os já existentes, precisa de uma atualização manual ou um script de migração (podemos fazer isso quando formos tratar dados de teste/produção). Ainda cabe, no futuro, uma subcoleção `Pets/{petId}/vacinas` para o histórico detalhado de doses (nome da vacina, data, próxima dose) — este campo booleano é só o indicador rápido "vacinado: sim/não" pedido agora.
 
-### `Localizacoes/{docId}`
+### `Localizacoes/{docId}` (coleção existente no banco, não usada pelo app)
 
-Coleção identificada no console, mas **ainda sem os campos compartilhados**. Pelo nome e pelo propósito do app, a hipótese é que guarde registros de localização/avistamento de um pet (por exemplo, quando alguém que encontrou o pet reporta onde ele foi visto, possivelmente a partir da página pública do QR code). Isso não estava nos requisitos funcionais originais — se for esse o caso, é uma funcionalidade nova a formalizar (proposta: RF31 abaixo). **Preciso que você compartilhe a estrutura de um documento dessa coleção** para eu documentar corretamente e ajustar o diagrama de classes.
+Coleção identificada no console, mas **os campos nunca foram compartilhados**. RF31/RF32 foram implementados sem tentar reconciliar com ela — em vez disso, criamos `Pets/{petId}/localizacoes/{id}` (ver abaixo), estrutura nova definida do zero, decisão consciente do usuário. Se um dia confirmarmos os campos desta coleção `Localizacoes` de nível raiz e ela tiver um propósito diferente/complementar, revisamos.
 
 ## Subcoleções criadas pelo app (não faziam parte do banco original)
 
@@ -83,6 +83,16 @@ As subcoleções abaixo não existiam na estrutura compartilhada original — fo
   "status": "agendada | realizada | cancelada"
 }
 ```
+
+### `Pets/{petId}/localizacoes/{localizacaoId}`
+```json
+{
+  "data": "string (dd/MM/yyyy)",
+  "descricao": "string",
+  "contatoReportante": "string | null"
+}
+```
+Sem latitude/longitude nesta fase — texto livre, para não introduzir uma dependência nova de mapas/geolocalização. RF31 (relato direto por quem encontrou o pet, sem login, a partir da página pública do QR code) segue bloqueado por RF17-19 — por ora, só o próprio tutor consegue registrar um avistamento pelo app.
 
 ## Convenção de datas
 

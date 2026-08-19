@@ -126,6 +126,12 @@ class PetDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   _ConsultaButton(petId: pet.id),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/pet/${pet.id}/localizacao'),
+                    icon: const Icon(Icons.location_on_outlined, color: AppColors.textPrimary),
+                    label: const Text('LOCALIZAÇÃO', style: TextStyle(color: AppColors.textPrimary)),
+                  ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/pet/${pet.id}/editar', extra: pet),
