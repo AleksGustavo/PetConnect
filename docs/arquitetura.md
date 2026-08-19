@@ -3,7 +3,8 @@
 ## Stack
 
 - **Flutter** (Android + iOS)
-- **Firebase**: Authentication, Firestore, Storage (fotos), Cloud Functions (página pública do QR code), Hosting (opcional, para servir a página pública)
+- **Firebase**: Authentication, Firestore, Cloud Functions (página pública do QR code), Hosting (opcional, para servir a página pública)
+- **Cloudinary**: upload de fotos (pet, tutor, anexos de histórico médico) — não Firebase Storage, que passou a exigir o plano pago (Blaze) no projeto real
 - **Riverpod** para gerenciamento de estado e injeção de dependência
 - **go_router** para navegação e deep links (importante para a página/rota que o QR code pode acionar dentro do próprio app, se optarmos por complementar a página web com um deep link)
 - **qr_flutter** para geração de QR code no app

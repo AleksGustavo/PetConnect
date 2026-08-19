@@ -16,7 +16,7 @@ Reconciliado com a estrutura real já existente no projeto Firebase (`pet-connec
 | `telefone` | string | sem formatação (ex: `"19991562584"`) |
 | `dataNascimento` | string | formato `"dd/MM/yyyy"` — **não** é Timestamp do Firestore |
 | `genero` | string | ex: `"Homem"`, `"Mulher"` |
-| `foto` | string | URL do Firebase Storage |
+| `foto` | string | URL do Cloudinary (antes era Firebase Storage — trocado por exigir plano pago) |
 | `usuarioID` | string (UUID) | identificador interno, **diferente** do `docId`/UID do Auth |
 
 > ⚠️ **A confirmar com o usuário**: existem dois identificadores para o mesmo usuário — o `docId` da coleção (= UID do Firebase Auth) e o campo `usuarioID` (UUID gerado separadamente). Nos documentos de `Pets` já existentes, o campo `userId` parece referenciar o **`docId`/UID do Auth**, não o `usuarioID`. Precisamos confirmar se `usuarioID` tem algum uso específico (ex: em `Localizacoes`?) antes de decidir se ele é mantido, depreciado, ou se é a chave que deveria estar sendo usada em `Pets.userId`.
@@ -88,9 +88,9 @@ As subcoleções abaixo fazem parte dos requisitos (carteira de vacina detalhada
 
 O banco existente usa **strings no formato `dd/MM/yyyy`** para datas, não `Timestamp` do Firestore. Mantemos essa convenção nos novos campos/coleções para consistência, em vez de introduzir um formato diferente no meio do mesmo banco.
 
-## Storage (fotos)
+## Armazenamento de fotos
 
-Já em uso: `foto` em `Usuarios` e (presumivelmente) em `Pets` apontam para URLs do Firebase Storage no bucket `pet-connect-c53f1.appspot.com`.
+`foto` em `Usuarios` e em `Pets`, além dos `anexos` do histórico médico, apontam para URLs do **Cloudinary** (ver `lib/core/config/cloudinary_config.dart`). Não é Firebase Storage — o Storage passou a exigir o plano pago (Blaze) no projeto Firebase real, então o upload foi trocado para um serviço com tier gratuito sem cartão.
 
 ## Índices sugeridos
 
