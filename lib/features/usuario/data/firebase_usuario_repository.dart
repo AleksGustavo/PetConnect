@@ -68,4 +68,41 @@ class FirebaseUsuarioRepository implements UsuarioRepository {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+
+  @override
+  Future<void> updateUsuario({
+    required String nome,
+    required String telefone,
+    String? foto,
+  }) async {
+    final uid = _auth.currentUser!.uid;
+    await _usuarios.doc(uid).update({
+      'nome': nome,
+      'telefone': telefone,
+      if (foto != null) 'foto': foto,
+    });
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser!;
+    final uid = user.uid;
+
+    final pets = await _firestore.collection('Pets').where('userId', isEqualTo: uid).get();
+    for (final pet in pets.docs) {
+      await _deleteSubcollection(pet.reference.collection('vacinas'));
+      await _deleteSubcollection(pet.reference.collection('historicoMedico'));
+      await pet.reference.delete();
+    }
+
+    await _usuarios.doc(uid).delete();
+    await user.delete();
+  }
+
+  Future<void> _deleteSubcollection(CollectionReference<Map<String, dynamic>> collection) async {
+    final docs = await collection.get();
+    for (final doc in docs.docs) {
+      await doc.reference.delete();
+    }
+  }
 }

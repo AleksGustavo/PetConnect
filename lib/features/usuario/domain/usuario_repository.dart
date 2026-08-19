@@ -23,4 +23,16 @@ abstract class UsuarioRepository {
   Future<void> sendPasswordReset({required String email});
 
   Future<void> signOut();
+
+  /// Edita nome, telefone e foto do tutor autenticado (RF08).
+  Future<void> updateUsuario({
+    required String nome,
+    required String telefone,
+    String? foto,
+  });
+
+  /// Exclui a conta do tutor autenticado (RF09): remove os pets (e as
+  /// subcoleções de vacinas/histórico médico de cada um), o documento do
+  /// tutor e o usuário no Firebase Auth.
+  Future<void> deleteAccount();
 }
