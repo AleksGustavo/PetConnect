@@ -11,6 +11,7 @@ Reconciliado com a estrutura real já existente no projeto Firebase (`pet-connec
 | Campo | Tipo (real) | Observação |
 |---|---|---|
 | `nome` | string | |
+| `sobrenome` | string | **novo campo, adicionado nesta fase** (edição de perfil, RF08) — contas criadas antes dele simplesmente não têm o valor até o tutor editar o perfil |
 | `email` | string | |
 | `telefone` | string | sem formatação (ex: `"19991562584"`) |
 | `dataNascimento` | string | formato `"dd/MM/yyyy"` — **não** é Timestamp do Firestore |

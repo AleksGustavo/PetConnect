@@ -51,6 +51,7 @@ class FirebaseUsuarioRepository implements UsuarioRepository {
     await _usuarios.doc(uid).set({
       'usuarioID': uid,
       'nome': nome,
+      'sobrenome': '',
       'email': email,
       'telefone': telefone,
       'dataNascimento': dataNascimento,
@@ -72,13 +73,19 @@ class FirebaseUsuarioRepository implements UsuarioRepository {
   @override
   Future<void> updateUsuario({
     required String nome,
+    required String sobrenome,
     required String telefone,
+    required String dataNascimento,
+    required String genero,
     String? foto,
   }) async {
     final uid = _auth.currentUser!.uid;
     await _usuarios.doc(uid).update({
       'nome': nome,
+      'sobrenome': sobrenome,
       'telefone': telefone,
+      'dataNascimento': dataNascimento,
+      'genero': genero,
       if (foto != null) 'foto': foto,
     });
   }

@@ -4,14 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/br_date.dart';
+import '../../../../core/utils/upload_error.dart';
 import '../../../../core/widgets/avatar_picker.dart';
 import '../../../pet/presentation/providers/anexo_providers.dart';
 import '../../domain/usuario.dart';
 import '../providers/auth_providers.dart';
 
 const _tamanhoMaximoFoto = 5 * 1024 * 1024; // 5MB — ver docs/seguranca.md.
+const _generos = ['Homem', 'Mulher', 'Outro'];
 
-/// Edição dos dados do tutor (RF08): nome, telefone e foto.
+/// Edição dos dados do tutor (RF08): nome, sobrenome, telefone, data de
+/// nascimento, gênero e foto.
 class EditarPerfilScreen extends ConsumerStatefulWidget {
   const EditarPerfilScreen({super.key, required this.usuario});
 
@@ -24,7 +28,12 @@ class EditarPerfilScreen extends ConsumerStatefulWidget {
 class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   final _formKey = GlobalKey<FormState>();
   late final _nomeController = TextEditingController(text: widget.usuario.nome);
+  late final _sobrenomeController = TextEditingController(text: widget.usuario.sobrenome);
   late final _telefoneController = TextEditingController(text: widget.usuario.telefone);
+  late final _nascimentoController =
+      TextEditingController(text: widget.usuario.dataNascimento);
+  late String? _genero =
+      widget.usuario.genero.isNotEmpty ? widget.usuario.genero : null;
   late String? _foto = widget.usuario.foto;
 
   bool _enviandoFoto = false;
@@ -34,8 +43,23 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   @override
   void dispose() {
     _nomeController.dispose();
+    _sobrenomeController.dispose();
     _telefoneController.dispose();
+    _nascimentoController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickNascimento() async {
+    final initial = parseBrDate(_nascimentoController.text) ?? DateTime(2000);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      _nascimentoController.text = formatBrDate(picked);
+    }
   }
 
   Future<void> _escolherFoto() async {
@@ -59,8 +83,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           .read(anexoRepositoryProvider)
           .upload(path: path, bytes: bytes, contentType: 'image/jpeg');
       if (mounted) setState(() => _foto = url);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'Não foi possível enviar a foto. Tente novamente.');
+    } catch (e) {
+      if (mounted) setState(() => _error = describirErroUpload(e, item: 'a foto'));
     } finally {
       if (mounted) setState(() => _enviandoFoto = false);
     }
@@ -75,7 +99,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     try {
       await ref.read(usuarioRepositoryProvider).updateUsuario(
             nome: _nomeController.text.trim(),
+            sobrenome: _sobrenomeController.text.trim(),
             telefone: _telefoneController.text.trim(),
+            dataNascimento: _nascimentoController.text.trim(),
+            genero: _genero ?? '',
             foto: _foto,
           );
       if (mounted) context.pop();
@@ -121,9 +148,33 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _sobrenomeController,
+                  decoration: const InputDecoration(hintText: 'Sobrenome:'),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _telefoneController,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(hintText: 'Telefone:'),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _nascimentoController,
+                  readOnly: true,
+                  onTap: _pickNascimento,
+                  decoration: const InputDecoration(
+                    hintText: 'Data de nascimento:',
+                    suffixIcon: Icon(Icons.calendar_today, color: AppColors.textMuted),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _genero,
+                  decoration: const InputDecoration(hintText: 'Gênero:'),
+                  items: _generos
+                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                      .toList(),
+                  onChanged: (value) => setState(() => _genero = value),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),

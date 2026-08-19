@@ -12,12 +12,18 @@ class Usuario {
     required this.telefone,
     required this.dataNascimento,
     required this.genero,
+    this.sobrenome = '',
     this.foto,
   });
 
   final String id;
   final String usuarioID;
   final String nome;
+
+  /// Campo novo (não existia no banco original) — contas criadas antes
+  /// desta versão simplesmente não têm o valor até o tutor editar o
+  /// perfil (RF08). Ver docs/modelo-dados-firestore.md.
+  final String sobrenome;
   final String email;
   final String telefone;
 
@@ -26,11 +32,15 @@ class Usuario {
   final String genero;
   final String? foto;
 
+  /// Nome completo (nome + sobrenome), usado em saudações/exibição.
+  String get nomeCompleto => [nome, sobrenome].where((s) => s.isNotEmpty).join(' ');
+
   factory Usuario.fromMap(String id, Map<String, dynamic> map) {
     return Usuario(
       id: id,
       usuarioID: map['usuarioID'] as String? ?? '',
       nome: map['nome'] as String? ?? '',
+      sobrenome: map['sobrenome'] as String? ?? '',
       email: map['email'] as String? ?? '',
       telefone: map['telefone'] as String? ?? '',
       dataNascimento: map['dataNascimento'] as String? ?? '',
@@ -43,6 +53,7 @@ class Usuario {
     return {
       'usuarioID': usuarioID,
       'nome': nome,
+      'sobrenome': sobrenome,
       'email': email,
       'telefone': telefone,
       'dataNascimento': dataNascimento,
@@ -53,6 +64,7 @@ class Usuario {
 
   Usuario copyWith({
     String? nome,
+    String? sobrenome,
     String? email,
     String? telefone,
     String? dataNascimento,
@@ -63,6 +75,7 @@ class Usuario {
       id: id,
       usuarioID: usuarioID,
       nome: nome ?? this.nome,
+      sobrenome: sobrenome ?? this.sobrenome,
       email: email ?? this.email,
       telefone: telefone ?? this.telefone,
       dataNascimento: dataNascimento ?? this.dataNascimento,
