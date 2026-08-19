@@ -71,6 +71,8 @@ void main() {
     expect(find.text(testEmail), findsOneWidget, reason: 'Home deveria mostrar o e-mail do usuário');
 
     await tester.tap(find.byIcon(Icons.logout));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Sair'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.text('Login'), findsOneWidget, reason: 'logout deveria voltar para a tela de login');
@@ -85,6 +87,8 @@ void main() {
     expect(find.text('Meus pets'), findsOneWidget, reason: 'login com credenciais corretas deveria voltar para a Home');
 
     await tester.tap(find.byIcon(Icons.logout));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Sair'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     final loginFields2 = find.byType(TextField);

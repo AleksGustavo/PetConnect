@@ -13,7 +13,10 @@ import '../features/pet/presentation/screens/pet_detail_screen.dart';
 import '../features/pet/presentation/screens/pet_form_screen.dart';
 import '../features/pet/presentation/screens/vacina_form_screen.dart';
 import '../features/pet/presentation/screens/vacina_list_screen.dart';
+import '../features/usuario/domain/usuario.dart';
 import '../features/usuario/presentation/providers/auth_providers.dart';
+import '../features/usuario/presentation/screens/configuracoes_screen.dart';
+import '../features/usuario/presentation/screens/editar_perfil_screen.dart';
 import '../features/usuario/presentation/screens/home_screen.dart';
 
 const _authRoutes = ['/login', '/cadastro', '/esqueci-senha'];
@@ -93,6 +96,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           petId: state.pathParameters['id']!,
           historico: state.extra as HistoricoMedico?,
         ),
+      ),
+      GoRoute(
+        path: '/configuracoes',
+        builder: (context, state) => const ConfiguracoesScreen(),
+      ),
+      GoRoute(
+        path: '/configuracoes/editar-perfil',
+        builder: (context, state) => EditarPerfilScreen(usuario: state.extra as Usuario),
       ),
     ],
   );
