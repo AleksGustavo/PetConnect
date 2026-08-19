@@ -65,7 +65,8 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
       if (mounted) setState(() => _error = translateAuthError(e.code));
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Não foi possível completar a operação. Tente novamente.');
+        setState(() =>
+            _error = 'Não foi possível completar a operação. Tente novamente.');
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -83,124 +84,141 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AuthHeader(onBack: () => context.pop()),
+              // Margem horizontal + cantos arredondados nos 4 lados: o card
+              // fica mais estreito que a tela, deixando o fundo branco do
+              // Scaffold aparecer nas laterais.
               Transform.translate(
                 offset: const Offset(0, -32),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32),
-                      topRight: Radius.circular(32),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.all(Radius.circular(32)),
                     ),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Crie sua conta',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Cadastre seus dados para começar a cuidar e proteger seus pets.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: AppColors.textMuted),
-                        ),
-                        const SizedBox(height: 24),
-                        _CampoComRotulo(
-                          rotulo: 'Nome completo',
-                          hint: 'Ex: Maria Silva',
-                          controller: _nomeController,
-                          validator: (value) =>
-                              (value == null || value.trim().isEmpty) ? 'Informe seu nome.' : null,
-                        ),
-                        const SizedBox(height: 14),
-                        _CampoComRotulo(
-                          rotulo: 'E-mail',
-                          hint: 'seu@email.com',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) return 'Informe seu e-mail.';
-                            if (!value.contains('@')) return 'E-mail inválido.';
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 14),
-                        _CampoComRotulo(
-                          rotulo: 'Telefone',
-                          hint: '(00) 00000-0000',
-                          controller: _telefoneController,
-                          keyboardType: TextInputType.phone,
-                        ),
-                        const SizedBox(height: 14),
-                        _CampoComRotulo(
-                          rotulo: 'Senha',
-                          hint: 'Mínimo 8 caracteres',
-                          controller: _senhaController,
-                          obscureText: !_senhaVisivel,
-                          validator: (value) => (value == null || value.length < 8)
-                              ? 'Mínimo de 8 caracteres.'
-                              : null,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                              color: AppColors.textMuted,
-                              size: 20,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'Crie sua conta',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
                             ),
-                            onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        _CampoComRotulo(
-                          rotulo: 'Confirmar senha',
-                          hint: 'Repita a senha',
-                          controller: _confirmarSenhaController,
-                          obscureText: !_confirmarSenhaVisivel,
-                          validator: (value) =>
-                              (value == null || value.isEmpty) ? 'Confirme sua senha.' : null,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _confirmarSenhaVisivel
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: AppColors.textMuted,
-                              size: 20,
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Cadastre seus dados para começar a cuidar e proteger seus pets.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AppColors.textMuted),
+                          ),
+                          const SizedBox(height: 24),
+                          _CampoComRotulo(
+                            rotulo: 'Nome completo',
+                            hint: 'Ex: Maria Silva',
+                            controller: _nomeController,
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                    ? 'Informe seu nome.'
+                                    : null,
+                          ),
+                          const SizedBox(height: 14),
+                          _CampoComRotulo(
+                            rotulo: 'E-mail',
+                            hint: 'seu@email.com',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Informe seu e-mail.';
+                              }
+                              if (!value.contains('@')) {
+                                return 'E-mail inválido.';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          _CampoComRotulo(
+                            rotulo: 'Telefone',
+                            hint: '(00) 00000-0000',
+                            controller: _telefoneController,
+                            keyboardType: TextInputType.phone,
+                          ),
+                          const SizedBox(height: 14),
+                          _CampoComRotulo(
+                            rotulo: 'Senha',
+                            hint: 'Mínimo 8 caracteres',
+                            controller: _senhaController,
+                            obscureText: !_senhaVisivel,
+                            validator: (value) =>
+                                (value == null || value.length < 8)
+                                    ? 'Mínimo de 8 caracteres.'
+                                    : null,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _senhaVisivel
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: AppColors.textMuted,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(
+                                  () => _senhaVisivel = !_senhaVisivel),
                             ),
-                            onPressed: () =>
-                                setState(() => _confirmarSenhaVisivel = !_confirmarSenhaVisivel),
                           ),
-                        ),
-                        if (_error != null) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            _error!,
-                            style: const TextStyle(color: AppColors.error, fontSize: 13),
+                          const SizedBox(height: 14),
+                          _CampoComRotulo(
+                            rotulo: 'Confirmar senha',
+                            hint: 'Repita a senha',
+                            controller: _confirmarSenhaController,
+                            obscureText: !_confirmarSenhaVisivel,
+                            validator: (value) =>
+                                (value == null || value.isEmpty)
+                                    ? 'Confirme sua senha.'
+                                    : null,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _confirmarSenhaVisivel
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: AppColors.textMuted,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() =>
+                                  _confirmarSenhaVisivel =
+                                      !_confirmarSenhaVisivel),
+                            ),
+                          ),
+                          if (_error != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _error!,
+                              style: const TextStyle(
+                                  color: AppColors.error, fontSize: 13),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: _submitting ? null : _handleCadastro,
+                            child: _submitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.textOnBrand,
+                                    ),
+                                  )
+                                : const Text('CRIAR CONTA'),
                           ),
                         ],
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _submitting ? null : _handleCadastro,
-                          child: _submitting
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.textOnBrand,
-                                  ),
-                                )
-                              : const Text('CRIAR CONTA'),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -247,7 +265,8 @@ class _CampoComRotulo extends StatelessWidget {
         children: [
           Text(
             rotulo,
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(width: 12),
           Expanded(
