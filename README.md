@@ -46,7 +46,7 @@ Além disso, centraliza para o tutor:
 | Gestão de pets (cadastro, listagem, edição, exclusão) | ✅ Concluído | RF10–RF15 |
 | QR code de identificação (exibido no app) | ✅ Concluído | RF16 |
 | Página pública do QR code + regeneração | ⬜ Não iniciado | RF17–RF19 |
-| Carteira de vacina | ⬜ Não iniciado | RF20–RF23 |
+| Carteira de vacina (registro, listagem, edição, exclusão, alerta visual) | ✅ Concluído | RF20–RF23 |
 | Histórico médico | ⬜ Não iniciado | RF24–RF26 |
 | Agendamento de consultas | ⬜ Não iniciado | RF27–RF30 |
 | Localização (a confirmar) | ⬜ Proposto | RF31–RF32 |
@@ -118,7 +118,7 @@ Ordem planejada para as próximas entregas, uma feature por Pull Request:
 
 1. ✅ ~~Gestão de pets (RF10–RF15)~~
 2. 🔗 QR code: ✅ ~~geração no app (RF16)~~ · página pública + regeneração (RF17–RF19) pendente
-3. 💉 Carteira de vacina (RF20–RF23)
+3. ✅ ~~Carteira de vacina (RF20–RF23)~~
 4. 🩺 Histórico médico (RF24–RF26)
 5. 📅 Agendamento de consultas (RF27–RF30)
 6. 📍 Localização (RF31–RF32, escopo a confirmar)

@@ -5,8 +5,11 @@ import '../features/auth/presentation/screens/cadastro_screen.dart';
 import '../features/auth/presentation/screens/esqueci_senha_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/pet/domain/pet.dart';
+import '../features/pet/domain/vacina.dart';
 import '../features/pet/presentation/screens/pet_detail_screen.dart';
 import '../features/pet/presentation/screens/pet_form_screen.dart';
+import '../features/pet/presentation/screens/vacina_form_screen.dart';
+import '../features/pet/presentation/screens/vacina_list_screen.dart';
 import '../features/usuario/presentation/providers/auth_providers.dart';
 import '../features/usuario/presentation/screens/home_screen.dart';
 
@@ -57,6 +60,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pet/:id/editar',
         builder: (context, state) => PetFormScreen(pet: state.extra as Pet?),
+      ),
+      GoRoute(
+        path: '/pet/:id/vacinas',
+        builder: (context, state) => VacinaListScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/pet/:id/vacinas/nova',
+        builder: (context, state) => VacinaFormScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/pet/:id/vacinas/:vacinaId/editar',
+        builder: (context, state) => VacinaFormScreen(
+          petId: state.pathParameters['id']!,
+          vacina: state.extra as Vacina?,
+        ),
       ),
     ],
   );

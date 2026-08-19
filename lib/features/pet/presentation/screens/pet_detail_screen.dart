@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 import '../../domain/pet.dart';
+import '../../domain/vacina_alerta.dart';
 import '../providers/pet_providers.dart';
+import '../providers/vacina_providers.dart';
 import '../widgets/pet_qr_code.dart';
 
 /// Perfil de um único pet (RF15), com atalhos para editar (RF13) e excluir
@@ -113,6 +115,8 @@ class PetDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   PetQrCode(pet: pet),
                   const SizedBox(height: 24),
+                  _VacinaButton(petId: pet.id),
+                  const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/pet/${pet.id}/editar', extra: pet),
                     icon: const Icon(Icons.edit),
@@ -129,6 +133,34 @@ class PetDetailScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Atalho para a carteira de vacina (RF20-23), com um indicador visual
+/// (RF23) quando alguma dose está próxima ou vencida.
+class _VacinaButton extends ConsumerWidget {
+  const _VacinaButton({required this.petId});
+
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vacinasAsync = ref.watch(vacinasProvider(petId));
+    final temAlerta = vacinasAsync.valueOrNull
+            ?.any((vacina) => calcularAlerta(vacina) != VacinaAlerta.nenhum) ??
+        false;
+
+    return OutlinedButton.icon(
+      onPressed: () => context.push('/pet/$petId/vacinas'),
+      icon: Icon(
+        temAlerta ? Icons.warning_amber_rounded : Icons.vaccines_outlined,
+        color: temAlerta ? AppColors.error : AppColors.textPrimary,
+      ),
+      label: Text(
+        temAlerta ? 'CARTEIRA DE VACINA — DOSE PENDENTE' : 'CARTEIRA DE VACINA',
+        style: TextStyle(color: temAlerta ? AppColors.error : AppColors.textPrimary),
       ),
     );
   }
