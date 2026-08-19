@@ -12,6 +12,8 @@ import '../features/pet/presentation/screens/consulta_form_screen.dart';
 import '../features/pet/presentation/screens/consulta_list_screen.dart';
 import '../features/pet/presentation/screens/historico_form_screen.dart';
 import '../features/pet/presentation/screens/historico_list_screen.dart';
+import '../features/pet/presentation/screens/localizacao_form_screen.dart';
+import '../features/pet/presentation/screens/localizacao_list_screen.dart';
 import '../features/pet/presentation/screens/pet_detail_screen.dart';
 import '../features/pet/presentation/screens/pet_form_screen.dart';
 import '../features/pet/presentation/screens/vacina_form_screen.dart';
@@ -114,6 +116,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           petId: state.pathParameters['id']!,
           consulta: state.extra as Consulta?,
         ),
+      ),
+      GoRoute(
+        path: '/pet/:id/localizacao',
+        builder: (context, state) => LocalizacaoListScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/pet/:id/localizacao/nova',
+        builder: (context, state) => LocalizacaoFormScreen(petId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/configuracoes',
