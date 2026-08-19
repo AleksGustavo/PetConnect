@@ -120,6 +120,18 @@ class _LoginCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Os campos desta tela ganham uma borda visível — diferente do padrão
+    // "preenchido, sem borda" usado no resto do app (ver InputDecorationTheme
+    // em app_theme.dart), a pedido específico para a tela de login.
+    final borda = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: AppColors.brandLight.withValues(alpha: 0.45)),
+    );
+    final bordaComFoco = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: AppColors.brandDark, width: 1.5),
+    );
+
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -149,7 +161,11 @@ class _LoginCard extends StatelessWidget {
           TextField(
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(hintText: 'E-mail:'),
+            decoration: InputDecoration(
+              hintText: 'E-mail:',
+              enabledBorder: borda,
+              focusedBorder: bordaComFoco,
+            ),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -157,6 +173,8 @@ class _LoginCard extends StatelessWidget {
             obscureText: !senhaVisivel,
             decoration: InputDecoration(
               hintText: 'Senha:',
+              enabledBorder: borda,
+              focusedBorder: bordaComFoco,
               suffixIcon: IconButton(
                 icon: Icon(
                   senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined,
