@@ -12,5 +12,5 @@
 /// Cloud name e upload preset "unsigned" não são segredos — é o uso
 /// pretendido pelo Cloudinary para apps client-side sem backend próprio
 /// (só permitem upload, não dão acesso de gerência da conta).
-const cloudinaryCloudName = 'SEU_CLOUD_NAME_AQUI';
-const cloudinaryUploadPreset = 'SEU_UPLOAD_PRESET_AQUI';
+const cloudinaryCloudName = 'qgrx3f8s';
+const cloudinaryUploadPreset = 'w31vgrqr';

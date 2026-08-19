@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   bool _submitting = false;
+  bool _senhaVisivel = false;
   String? _error;
 
   @override
@@ -74,6 +75,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         emailController: _emailController,
                         senhaController: _senhaController,
                         submitting: _submitting,
+                        senhaVisivel: _senhaVisivel,
+                        onToggleSenhaVisivel: () => setState(() => _senhaVisivel = !_senhaVisivel),
                         error: _error,
                         onSubmit: _handleLogin,
                         onForgotPassword: () => context.push('/esqueci-senha'),
@@ -99,6 +102,8 @@ class _LoginCard extends StatelessWidget {
     required this.emailController,
     required this.senhaController,
     required this.submitting,
+    required this.senhaVisivel,
+    required this.onToggleSenhaVisivel,
     required this.error,
     required this.onSubmit,
     required this.onForgotPassword,
@@ -107,6 +112,8 @@ class _LoginCard extends StatelessWidget {
   final TextEditingController emailController;
   final TextEditingController senhaController;
   final bool submitting;
+  final bool senhaVisivel;
+  final VoidCallback onToggleSenhaVisivel;
   final String? error;
   final VoidCallback onSubmit;
   final VoidCallback onForgotPassword;
@@ -147,8 +154,17 @@ class _LoginCard extends StatelessWidget {
           const SizedBox(height: 16),
           TextField(
             controller: senhaController,
-            obscureText: true,
-            decoration: const InputDecoration(hintText: 'Senha:'),
+            obscureText: !senhaVisivel,
+            decoration: InputDecoration(
+              hintText: 'Senha:',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  color: AppColors.textMuted,
+                ),
+                onPressed: onToggleSenhaVisivel,
+              ),
+            ),
           ),
           if (error != null) ...[
             const SizedBox(height: 12),

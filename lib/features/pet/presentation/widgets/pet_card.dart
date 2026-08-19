@@ -1,33 +1,55 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/br_date.dart';
 import '../../domain/pet.dart';
 
+/// Card de um pet na lista da Home (RF11) — foto grande, selo de espécie,
+/// idade e um badge de gênero, com uma cor de destaque cíclica por posição
+/// na lista (ver [AppColors.petCardBackgrounds]).
 class PetCard extends StatelessWidget {
-  const PetCard({super.key, required this.pet, required this.onTap});
+  const PetCard({super.key, required this.pet, required this.colorIndex, required this.onTap});
 
   final Pet pet;
+  final int colorIndex;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final background = AppColors.petCardBackgrounds[colorIndex % AppColors.petCardBackgrounds.length];
+    final accent = AppColors.petCardAccents[colorIndex % AppColors.petCardAccents.length];
+    final idade = idadeEmAnos(pet.dataNascimento);
+    final generoFeminino = pet.genero.toLowerCase().startsWith('f');
+
     return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
+      color: background,
+      borderRadius: BorderRadius.circular(24),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: AppColors.background,
-                backgroundImage: pet.foto != null ? NetworkImage(pet.foto!) : null,
-                child: pet.foto == null
-                    ? const Icon(Icons.pets, color: AppColors.brandMedium)
-                    : null,
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CircleAvatar(
+                    radius: 36,
+                    backgroundColor: Colors.white,
+                    backgroundImage: pet.foto != null ? NetworkImage(pet.foto!) : null,
+                    child: pet.foto == null ? Icon(Icons.pets, color: accent, size: 32) : null,
+                  ),
+                  Positioned(
+                    bottom: -2,
+                    left: -2,
+                    child: CircleAvatar(
+                      radius: 13,
+                      backgroundColor: accent,
+                      child: const Icon(Icons.pets, color: Colors.white, size: 14),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -37,25 +59,52 @@ class PetCard extends StatelessWidget {
                     Text(
                       pet.nome,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      [pet.especie, pet.raca].where((s) => s.isNotEmpty).join(' · '),
+                      [pet.especie, if (idade != null) '$idade ${idade == 1 ? 'ano' : 'anos'}']
+                          .where((s) => s.isNotEmpty)
+                          .join(' · '),
                       style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                     ),
+                    if (pet.genero.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              generoFeminino ? Icons.female : Icons.male,
+                              size: 14,
+                              color: accent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              pet.genero,
+                              style: TextStyle(fontSize: 12, color: accent, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              Icon(
-                pet.vacinado ? Icons.verified : Icons.error_outline,
-                color: pet.vacinado ? Colors.green : AppColors.error,
-              ),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: AppColors.textMuted),
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: accent,
+                child: const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+              ),
             ],
           ),
         ),

@@ -103,10 +103,10 @@ class _PawPrintsBackground extends StatelessWidget {
           repeat: ImageRepeat.repeat,
           fit: BoxFit.none,
           alignment: Alignment.topLeft,
-          // Decodifica a imagem bem menor que o tamanho original — é isso
-          // que faz várias patinhas pequenas aparecerem lado a lado em vez
-          // de poucas patinhas grandes e espaçadas.
-          cacheWidth: 40,
+          // Decodifica a imagem menor que o tamanho original — é isso que
+          // faz várias patinhas aparecerem lado a lado em vez de poucas
+          // patinhas grandes e espaçadas. Valor maior = patinhas maiores.
+          cacheWidth: 64,
           filterQuality: FilterQuality.medium,
           // Some silenciosamente se o arquivo ainda não foi adicionado, em vez
           // de mostrar o ícone de erro padrão do Flutter por cima do header.
