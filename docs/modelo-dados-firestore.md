@@ -48,9 +48,9 @@ Reconciliado com a estrutura real já existente no projeto Firebase (`pet-connec
 
 Coleção identificada no console, mas **ainda sem os campos compartilhados**. Pelo nome e pelo propósito do app, a hipótese é que guarde registros de localização/avistamento de um pet (por exemplo, quando alguém que encontrou o pet reporta onde ele foi visto, possivelmente a partir da página pública do QR code). Isso não estava nos requisitos funcionais originais — se for esse o caso, é uma funcionalidade nova a formalizar (proposta: RF31 abaixo). **Preciso que você compartilhe a estrutura de um documento dessa coleção** para eu documentar corretamente e ajustar o diagrama de classes.
 
-## Proposta ainda não implementada no banco real
+## Subcoleções criadas pelo app (não faziam parte do banco original)
 
-As subcoleções abaixo fazem parte dos requisitos (carteira de vacina detalhada, histórico médico, consultas) mas **não existem ainda** na estrutura compartilhada — ficam como próximo passo de implementação, não como algo já existente a reconciliar:
+As subcoleções abaixo não existiam na estrutura compartilhada original — foram criadas pelo próprio app conforme cada feature foi implementada (carteira de vacina detalhada, histórico médico, consultas). Documentos só passam a existir a partir do primeiro registro feito pelo tutor em cada pet.
 
 ### `Pets/{petId}/vacinas/{vacinaId}` (detalhe, além do campo `vacinado`)
 ```json

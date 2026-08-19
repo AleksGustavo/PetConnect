@@ -1,0 +1,45 @@
+import 'dart:async';
+
+import 'package:pet_connect/core/utils/br_date.dart';
+import 'package:pet_connect/features/pet/domain/consulta.dart';
+import 'package:pet_connect/features/pet/domain/consulta_repository.dart';
+
+/// Repositório em memória para testes de widget, sem depender de um
+/// Firestore real (ver "Testes" em docs/arquitetura.md).
+class FakeConsultaRepository implements ConsultaRepository {
+  final Map<String, Map<String, Consulta>> _store = {};
+  final _changes = StreamController<void>.broadcast();
+  int _nextId = 0;
+
+  @override
+  Stream<List<Consulta>> watchConsultas(String petId) async* {
+    yield _snapshot(petId);
+    await for (final _ in _changes.stream) {
+      yield _snapshot(petId);
+    }
+  }
+
+  @override
+  Future<void> createConsulta(String petId, Consulta consulta) async {
+    final id = 'consulta-${_nextId++}';
+    _store.putIfAbsent(petId, () => {})[id] = Consulta.fromMap(id, consulta.toMap());
+    _changes.add(null);
+  }
+
+  @override
+  Future<void> updateConsulta(String petId, Consulta consulta) async {
+    _store.putIfAbsent(petId, () => {})[consulta.id] = consulta;
+    _changes.add(null);
+  }
+
+  List<Consulta> _snapshot(String petId) {
+    final consultas = (_store[petId] ?? {}).values.toList();
+    consultas.sort((a, b) {
+      final dataA = parseBrDate(a.data);
+      final dataB = parseBrDate(b.data);
+      if (dataA == null || dataB == null) return 0;
+      return dataA.compareTo(dataB);
+    });
+    return consultas;
+  }
+}

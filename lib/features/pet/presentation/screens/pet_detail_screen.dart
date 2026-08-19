@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
+import '../../domain/consulta_alerta.dart';
 import '../../domain/pet.dart';
 import '../../domain/vacina_alerta.dart';
+import '../providers/consulta_providers.dart';
 import '../providers/pet_providers.dart';
 import '../providers/vacina_providers.dart';
 import '../widgets/pet_qr_code.dart';
@@ -122,6 +124,8 @@ class PetDetailScreen extends ConsumerWidget {
                     icon: const Icon(Icons.medical_information_outlined, color: AppColors.textPrimary),
                     label: const Text('HISTÓRICO MÉDICO', style: TextStyle(color: AppColors.textPrimary)),
                   ),
+                  const SizedBox(height: 12),
+                  _ConsultaButton(petId: pet.id),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/pet/${pet.id}/editar', extra: pet),
@@ -166,6 +170,33 @@ class _VacinaButton extends ConsumerWidget {
       ),
       label: Text(
         temAlerta ? 'CARTEIRA DE VACINA — DOSE PENDENTE' : 'CARTEIRA DE VACINA',
+        style: TextStyle(color: temAlerta ? AppColors.error : AppColors.textPrimary),
+      ),
+    );
+  }
+}
+
+/// Atalho para o agendamento de consultas (RF27-30), com um indicador
+/// visual (RF30) quando alguma consulta futura está próxima.
+class _ConsultaButton extends ConsumerWidget {
+  const _ConsultaButton({required this.petId});
+
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final consultasAsync = ref.watch(consultasProvider(petId));
+    final temAlerta =
+        consultasAsync.valueOrNull?.any((consulta) => consultaEstaProxima(consulta)) ?? false;
+
+    return OutlinedButton.icon(
+      onPressed: () => context.push('/pet/$petId/consultas'),
+      icon: Icon(
+        temAlerta ? Icons.warning_amber_rounded : Icons.event_available_outlined,
+        color: temAlerta ? AppColors.error : AppColors.textPrimary,
+      ),
+      label: Text(
+        temAlerta ? 'CONSULTAS — PRÓXIMA MARCADA' : 'CONSULTAS',
         style: TextStyle(color: temAlerta ? AppColors.error : AppColors.textPrimary),
       ),
     );
