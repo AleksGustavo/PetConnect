@@ -37,33 +37,41 @@ class AuthHeader extends StatelessWidget {
         child: Stack(
           children: [
             const Positioned.fill(child: _PawPrintsBackground()),
-            Column(
-              children: [
-                if (onBack != null)
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: IconButton(
-                      onPressed: onBack,
-                      icon: const Icon(Icons.arrow_back, color: AppColors.textOnBrand),
+            // O SizedBox força a coluna a ocupar a largura inteira do
+            // cabeçalho — sem ele, quando não há botão de voltar (login), a
+            // coluna encolhe para a largura do próprio conteúdo e fica
+            // alinhada à esquerda do Stack em vez de centralizada.
+            SizedBox(
+              width: double.infinity,
+              child: Column(
+                children: [
+                  if (onBack != null)
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        onPressed: onBack,
+                        icon: const Icon(Icons.arrow_back, color: AppColors.textOnBrand),
+                      ),
+                    ),
+                  Image.asset('assets/images/logo.png', width: 160, height: 160),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'PetConnect',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textOnBrand,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                Image.asset('assets/images/logo.png', width: 160, height: 160),
-                const SizedBox(height: 24),
-                const Text(
-                  'PetConnect',
-                  style: TextStyle(
-                    color: AppColors.textOnBrand,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Conectando corações perdidos aos seus lares',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textOnBrand, fontSize: 14),
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Conectando corações perdidos aos seus lares',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textOnBrand, fontSize: 14),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -77,16 +85,33 @@ class _PawPrintsBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: 0.15,
-      child: Image.asset(
-        'assets/images/pawprints.png',
-        repeat: ImageRepeat.repeat,
-        fit: BoxFit.none,
-        alignment: Alignment.topLeft,
-        // Some silenciosamente se o arquivo ainda não foi adicionado, em vez
-        // de mostrar o ícone de erro padrão do Flutter por cima do header.
-        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+    // ShaderMask com um gradiente branco->transparente de cima para baixo
+    // "apaga" gradualmente as patinhas perto da base do header, dando a
+    // impressão de que elas descem e somem.
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (bounds) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white, Colors.white, Colors.transparent],
+        stops: [0.0, 0.55, 1.0],
+      ).createShader(bounds),
+      child: Opacity(
+        opacity: 0.16,
+        child: Image.asset(
+          'assets/images/pawprints.png',
+          repeat: ImageRepeat.repeat,
+          fit: BoxFit.none,
+          alignment: Alignment.topLeft,
+          // Decodifica a imagem bem menor que o tamanho original — é isso
+          // que faz várias patinhas pequenas aparecerem lado a lado em vez
+          // de poucas patinhas grandes e espaçadas.
+          cacheWidth: 40,
+          filterQuality: FilterQuality.medium,
+          // Some silenciosamente se o arquivo ainda não foi adicionado, em vez
+          // de mostrar o ícone de erro padrão do Flutter por cima do header.
+          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+        ),
       ),
     );
   }

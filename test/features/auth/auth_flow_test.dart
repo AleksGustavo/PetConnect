@@ -43,24 +43,12 @@ void main() {
     expect(find.text('Crie sua conta'), findsOneWidget, reason: 'deveria navegar para o cadastro');
 
     final cadastroFields = find.byType(TextFormField);
-    expect(cadastroFields, findsNWidgets(6));
+    expect(cadastroFields, findsNWidgets(5));
     await tester.enterText(cadastroFields.at(0), testNome); // nome
     await tester.enterText(cadastroFields.at(1), testEmail); // e-mail
     await tester.enterText(cadastroFields.at(2), '19991562584'); // telefone
-
-    // Nascimento é somente leitura (preenchido via showDatePicker).
-    await tester.tap(cadastroFields.at(3));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('${DateTime.now().day}'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(cadastroFields.at(4), testSenha); // senha
-    await tester.enterText(cadastroFields.at(5), testSenha); // confirmar senha
-
-    await tester.tap(find.byType(Checkbox));
-    await tester.pumpAndSettle();
+    await tester.enterText(cadastroFields.at(3), testSenha); // senha
+    await tester.enterText(cadastroFields.at(4), testSenha); // confirmar senha
 
     await tester.tap(find.widgetWithText(ElevatedButton, 'CRIAR CONTA'));
     await tester.pumpAndSettle(const Duration(seconds: 2));

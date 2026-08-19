@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/br_date.dart';
+import '../../../../core/utils/upload_error.dart';
 import '../../../../core/widgets/avatar_picker.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 import '../../domain/pet.dart';
@@ -96,8 +97,8 @@ class _PetFormScreenState extends ConsumerState<PetFormScreen> {
           .read(anexoRepositoryProvider)
           .upload(path: path, bytes: bytes, contentType: 'image/jpeg');
       if (mounted) setState(() => _foto = url);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'Não foi possível enviar a foto. Tente novamente.');
+    } catch (e) {
+      if (mounted) setState(() => _error = describirErroUpload(e, item: 'a foto'));
     } finally {
       if (mounted) setState(() => _enviandoFoto = false);
     }
