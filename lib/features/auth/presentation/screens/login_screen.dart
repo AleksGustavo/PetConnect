@@ -1,19 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/auth_error_translator.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../usuario/presentation/providers/auth_providers.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   bool _submitting = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -23,11 +28,27 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    // TODO(auth): ligar ao UsuarioRepository (Firebase Auth) quando estiver
-    // disponível — por ora só evita duplo toque enquanto não há lógica real.
-    setState(() => _submitting = true);
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    if (mounted) setState(() => _submitting = false);
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+
+    try {
+      await ref.read(usuarioRepositoryProvider).signIn(
+            email: _emailController.text.trim(),
+            password: _senhaController.text,
+          );
+      // Navegação para /home é feita pelo redirect do go_router assim que
+      // authStateChangesProvider detectar a sessão — ver app_router.dart.
+    } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() => _error = translateAuthError(e.code));
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'Não foi possível completar a operação. Tente novamente.');
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
@@ -52,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         emailController: _emailController,
                         senhaController: _senhaController,
                         submitting: _submitting,
+                        error: _error,
                         onSubmit: _handleLogin,
                         onForgotPassword: () => context.push('/esqueci-senha'),
                       ),
@@ -119,6 +141,7 @@ class _LoginCard extends StatelessWidget {
     required this.emailController,
     required this.senhaController,
     required this.submitting,
+    required this.error,
     required this.onSubmit,
     required this.onForgotPassword,
   });
@@ -126,6 +149,7 @@ class _LoginCard extends StatelessWidget {
   final TextEditingController emailController;
   final TextEditingController senhaController;
   final bool submitting;
+  final String? error;
   final VoidCallback onSubmit;
   final VoidCallback onForgotPassword;
 
@@ -168,6 +192,13 @@ class _LoginCard extends StatelessWidget {
             obscureText: true,
             decoration: const InputDecoration(hintText: 'Senha:'),
           ),
+          if (error != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              error!,
+              style: const TextStyle(color: AppColors.error, fontSize: 13),
+            ),
+          ],
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: submitting ? null : onSubmit,
