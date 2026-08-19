@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/br_date.dart';
+import '../../../../core/utils/upload_error.dart';
 import '../../domain/historico_medico.dart';
 import '../providers/anexo_providers.dart';
 import '../providers/historico_medico_providers.dart';
@@ -86,8 +87,8 @@ class _HistoricoFormScreenState extends ConsumerState<HistoricoFormScreen> {
             contentType: 'image/jpeg',
           );
       if (mounted) setState(() => _anexos = [..._anexos, url]);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'Não foi possível enviar o anexo. Tente novamente.');
+    } catch (e) {
+      if (mounted) setState(() => _error = describirErroUpload(e, item: 'o anexo'));
     } finally {
       if (mounted) setState(() => _enviandoAnexo = false);
     }

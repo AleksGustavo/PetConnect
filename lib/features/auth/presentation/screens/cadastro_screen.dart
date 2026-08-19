@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/auth_error_translator.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/br_date.dart';
 import '../../../../core/widgets/auth_header.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 
@@ -21,13 +20,11 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _telefoneController = TextEditingController();
-  final _nascimentoController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
 
   bool _senhaVisivel = false;
   bool _confirmarSenhaVisivel = false;
-  bool _aceitouTermos = false;
   bool _submitting = false;
   String? _error;
 
@@ -36,23 +33,9 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
     _nomeController.dispose();
     _emailController.dispose();
     _telefoneController.dispose();
-    _nascimentoController.dispose();
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickNascimento() async {
-    final initial = parseBrDate(_nascimentoController.text) ?? DateTime(2000);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      _nascimentoController.text = formatBrDate(picked);
-    }
   }
 
   Future<void> _handleCadastro() async {
@@ -65,11 +48,6 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
       return;
     }
 
-    if (!_aceitouTermos) {
-      setState(() => _error = 'É preciso aceitar os Termos de Uso e a Política de Privacidade.');
-      return;
-    }
-
     setState(() => _submitting = true);
 
     try {
@@ -78,7 +56,9 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
             email: _emailController.text.trim(),
             password: _senhaController.text,
             telefone: _telefoneController.text.trim(),
-            dataNascimento: _nascimentoController.text.trim(),
+            // Data de nascimento não é mais pedida no cadastro — fica para
+            // a edição de perfil (RF08), mantendo o formulário curto.
+            dataNascimento: '',
           );
       // Navegação para /home é feita pelo redirect do go_router.
     } on FirebaseAuthException catch (e) {
@@ -104,7 +84,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
             children: [
               AuthHeader(onBack: () => context.pop()),
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -146,38 +126,11 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const _FieldLabel('Telefone'),
-                                TextFormField(
-                                  controller: _telefoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: const InputDecoration(hintText: '(00) 00000-000'),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const _FieldLabel('Nascimento'),
-                                TextFormField(
-                                  controller: _nascimentoController,
-                                  readOnly: true,
-                                  onTap: _pickNascimento,
-                                  decoration: const InputDecoration(hintText: 'DD/MM/AAAA'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      const _FieldLabel('Telefone'),
+                      TextFormField(
+                        controller: _telefoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(hintText: '(00) 00000-000'),
                       ),
                       const SizedBox(height: 16),
                       const _FieldLabel('Senha'),
@@ -218,42 +171,6 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                         ),
                         validator: (value) =>
                             (value == null || value.isEmpty) ? 'Confirme sua senha.' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () => setState(() => _aceitouTermos = !_aceitouTermos),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Checkbox(
-                              value: _aceitouTermos,
-                              activeColor: AppColors.brandDark,
-                              onChanged: (value) => setState(() => _aceitouTermos = value ?? false),
-                            ),
-                            const Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 12),
-                                child: Text.rich(
-                                  TextSpan(
-                                    style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                                    children: [
-                                      TextSpan(text: 'Li e aceito os '),
-                                      TextSpan(
-                                        text: 'Termos de Uso',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      TextSpan(text: ' e a '),
-                                      TextSpan(
-                                        text: 'Política de Privacidade',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 12),
