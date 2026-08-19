@@ -16,6 +16,8 @@ abstract class UsuarioRepository {
     required String nome,
     required String email,
     required String password,
+    required String telefone,
+    required String dataNascimento,
   });
 
   Future<void> sendPasswordReset({required String email});

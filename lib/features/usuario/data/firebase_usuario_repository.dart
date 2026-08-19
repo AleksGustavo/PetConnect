@@ -36,6 +36,8 @@ class FirebaseUsuarioRepository implements UsuarioRepository {
     required String nome,
     required String email,
     required String password,
+    required String telefone,
+    required String dataNascimento,
   }) async {
     final credential = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -50,8 +52,8 @@ class FirebaseUsuarioRepository implements UsuarioRepository {
       'usuarioID': uid,
       'nome': nome,
       'email': email,
-      'telefone': '',
-      'dataNascimento': '',
+      'telefone': telefone,
+      'dataNascimento': dataNascimento,
       'genero': '',
       'foto': null,
     });

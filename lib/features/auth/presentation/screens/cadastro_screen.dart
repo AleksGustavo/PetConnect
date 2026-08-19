@@ -1,14 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/auth_error_translator.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/br_date.dart';
+import '../../../../core/widgets/auth_header.dart';
 import '../../../usuario/presentation/providers/auth_providers.dart';
 
-/// Cadastro pede só o essencial (nome, e-mail, senha) — telefone, data de
-/// nascimento, gênero e foto ficam para a edição de perfil (RF08), evitando
-/// um formulário longo logo de cara (RNF07).
 class CadastroScreen extends ConsumerStatefulWidget {
   const CadastroScreen({super.key});
 
@@ -20,8 +20,14 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  final _nascimentoController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
+
+  bool _senhaVisivel = false;
+  bool _confirmarSenhaVisivel = false;
+  bool _aceitouTermos = false;
   bool _submitting = false;
   String? _error;
 
@@ -29,9 +35,24 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
   void dispose() {
     _nomeController.dispose();
     _emailController.dispose();
+    _telefoneController.dispose();
+    _nascimentoController.dispose();
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickNascimento() async {
+    final initial = parseBrDate(_nascimentoController.text) ?? DateTime(2000);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      _nascimentoController.text = formatBrDate(picked);
+    }
   }
 
   Future<void> _handleCadastro() async {
@@ -44,6 +65,11 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
       return;
     }
 
+    if (!_aceitouTermos) {
+      setState(() => _error = 'É preciso aceitar os Termos de Uso e a Política de Privacidade.');
+      return;
+    }
+
     setState(() => _submitting = true);
 
     try {
@@ -51,6 +77,8 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
             nome: _nomeController.text.trim(),
             email: _emailController.text.trim(),
             password: _senhaController.text,
+            telefone: _telefoneController.text.trim(),
+            dataNascimento: _nascimentoController.text.trim(),
           );
       // Navegação para /home é feita pelo redirect do go_router.
     } on FirebaseAuthException catch (e) {
@@ -67,81 +95,209 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text('Criar conta', style: TextStyle(color: AppColors.textPrimary)),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _nomeController,
-                  decoration: const InputDecoration(hintText: 'Nome:'),
-                  validator: (value) =>
-                      (value == null || value.trim().isEmpty) ? 'Informe seu nome.' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(hintText: 'E-mail:'),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Informe seu e-mail.';
-                    if (!value.contains('@')) return 'E-mail inválido.';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _senhaController,
-                  obscureText: true,
-                  decoration: const InputDecoration(hintText: 'Senha:'),
-                  validator: (value) => (value == null || value.length < 6)
-                      ? 'Mínimo de 6 caracteres.'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _confirmarSenhaController,
-                  obscureText: true,
-                  decoration: const InputDecoration(hintText: 'Confirmar senha:'),
-                  validator: (value) =>
-                      (value == null || value.isEmpty) ? 'Confirme sua senha.' : null,
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: AppColors.error, fontSize: 13),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _submitting ? null : _handleCadastro,
-                  child: _submitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.textOnBrand,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthHeader(onBack: () => context.pop()),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Crie sua conta',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Cadastre seus dados para começar a cuidar e proteger seus pets.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AppColors.textMuted),
+                      ),
+                      const SizedBox(height: 24),
+                      const _FieldLabel('Nome completo'),
+                      TextFormField(
+                        controller: _nomeController,
+                        decoration: const InputDecoration(hintText: 'Ex: Maria Silva'),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty) ? 'Informe seu nome.' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      const _FieldLabel('E-mail'),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(hintText: 'seu@email.com'),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) return 'Informe seu e-mail.';
+                          if (!value.contains('@')) return 'E-mail inválido.';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const _FieldLabel('Telefone'),
+                                TextFormField(
+                                  controller: _telefoneController,
+                                  keyboardType: TextInputType.phone,
+                                  decoration: const InputDecoration(hintText: '(00) 00000-000'),
+                                ),
+                              ],
+                            ),
                           ),
-                        )
-                      : const Text('CRIAR CONTA'),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const _FieldLabel('Nascimento'),
+                                TextFormField(
+                                  controller: _nascimentoController,
+                                  readOnly: true,
+                                  onTap: _pickNascimento,
+                                  decoration: const InputDecoration(hintText: 'DD/MM/AAAA'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const _FieldLabel('Senha'),
+                      TextFormField(
+                        controller: _senhaController,
+                        obscureText: !_senhaVisivel,
+                        decoration: InputDecoration(
+                          hintText: 'Mínimo 8 caracteres',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                              color: AppColors.textMuted,
+                            ),
+                            onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
+                          ),
+                        ),
+                        validator: (value) => (value == null || value.length < 8)
+                            ? 'Mínimo de 8 caracteres.'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      const _FieldLabel('Confirmar senha'),
+                      TextFormField(
+                        controller: _confirmarSenhaController,
+                        obscureText: !_confirmarSenhaVisivel,
+                        decoration: InputDecoration(
+                          hintText: 'Repita a senha',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _confirmarSenhaVisivel
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: AppColors.textMuted,
+                            ),
+                            onPressed: () =>
+                                setState(() => _confirmarSenhaVisivel = !_confirmarSenhaVisivel),
+                          ),
+                        ),
+                        validator: (value) =>
+                            (value == null || value.isEmpty) ? 'Confirme sua senha.' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () => setState(() => _aceitouTermos = !_aceitouTermos),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                              value: _aceitouTermos,
+                              activeColor: AppColors.brandDark,
+                              onChanged: (value) => setState(() => _aceitouTermos = value ?? false),
+                            ),
+                            const Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 12),
+                                child: Text.rich(
+                                  TextSpan(
+                                    style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                                    children: [
+                                      TextSpan(text: 'Li e aceito os '),
+                                      TextSpan(
+                                        text: 'Termos de Uso',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: ' e a '),
+                                      TextSpan(
+                                        text: 'Política de Privacidade',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _error!,
+                          style: const TextStyle(color: AppColors.error, fontSize: 13),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _submitting ? null : _handleCadastro,
+                        child: _submitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.textOnBrand,
+                                ),
+                              )
+                            : const Text('CRIAR CONTA'),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(text, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
     );
   }
 }
