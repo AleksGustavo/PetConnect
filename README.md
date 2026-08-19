@@ -1,26 +1,82 @@
-# PetConnect
+# 🐾 PetConnect
 
-App mobile para localização de pets desaparecidos. Cada tutor cadastra seus pets; cada pet tem um perfil com carteira de vacina, histórico médico e agendamento de consultas, além de um QR code que abre uma página pública com informações básicas do pet — para ajudar quem o encontrar a devolvê-lo ao tutor.
+App mobile para localização de pets desaparecidos. Cada tutor cadastra seus pets; cada pet tem um perfil com carteira de vacina, histórico médico e agendamento de consultas, além de um **QR code** que abre uma página pública com informações básicas do pet — para ajudar quem o encontrar a devolvê-lo ao tutor.
+
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.22-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore%20%7C%20Storage-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey)](#)
+[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)](#status-do-projeto)
+[![License: TBD](https://img.shields.io/badge/license-a%20definir-inactive)](#)
+
+## Índice
+
+- [Sobre o projeto](#sobre-o-projeto)
+- [Status do projeto](#status-do-projeto)
+- [Stack](#stack)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Como rodar](#como-rodar)
+- [Documentação](#documentação)
+- [Contribuindo](#contribuindo)
+- [Roadmap](#roadmap)
+
+## Sobre o projeto
+
+O PetConnect resolve um problema concreto: pets fugidos ou perdidos raramente carregam uma forma confiável de identificação que leve de volta ao tutor. O app permite que qualquer pessoa que encontre um pet cadastrado escaneie o QR code em sua coleira (ou etiqueta) e veja, sem precisar instalar nada, o essencial para devolvê-lo — sem expor dados sensíveis do tutor ou o histórico médico completo do animal.
+
+Além disso, centraliza para o tutor:
+- 🐶 **Perfil de cada pet** — nome, espécie, raça, data de nascimento e foto.
+- 💉 **Carteira de vacina** — histórico de vacinas aplicadas e alertas de próxima dose.
+- 🩺 **Histórico médico** — consultas, exames e anotações por pet.
+- 📅 **Agendamento de consultas** — com lembretes.
+- 🔗 **QR code** — página pública de identificação, regenerável a qualquer momento.
+
+## Status do projeto
+
+> Projeto em desenvolvimento ativo. A tabela abaixo reflete o que já está implementado e funcionando, não apenas planejado.
+
+| Área | Status | Requisitos |
+|---|---|---|
+| Estrutura, documentação e modelo de dados | ✅ Concluído | — |
+| Conexão com Firebase (projeto real `pet-connect-c53f1`) | ✅ Concluído | — |
+| Cadastro, login e recuperação de senha (e-mail/senha) | ✅ Concluído | RF01–RF03, RF05 |
+| Sessão persistida + rotas protegidas | ✅ Concluído | RF06 |
+| Logout | ✅ Concluído | RF07 |
+| Login social (Google / Facebook) | ⬜ Não iniciado | RF04-A, RF04-B |
+| Edição/exclusão da conta do tutor | ⬜ Não iniciado | RF08–RF09 |
+| Gestão de pets (cadastro, listagem, edição, exclusão) | ⬜ Não iniciado | RF10–RF15 |
+| QR code de identificação + página pública | ⬜ Não iniciado | RF16–RF19 |
+| Carteira de vacina | ⬜ Não iniciado | RF20–RF23 |
+| Histórico médico | ⬜ Não iniciado | RF24–RF26 |
+| Agendamento de consultas | ⬜ Não iniciado | RF27–RF30 |
+| Localização (a confirmar) | ⬜ Proposto | RF31–RF32 |
+
+Veja a lista completa de requisitos em [`docs/requisitos-funcionais.md`](docs/requisitos-funcionais.md).
 
 ## Stack
 
-- Flutter (Android + iOS)
-- Firebase: Authentication, Firestore, Storage, Cloud Functions
-- Riverpod (estado) + go_router (navegação)
+| Camada | Tecnologia |
+|---|---|
+| App mobile | [Flutter](https://flutter.dev) (Android + iOS) |
+| Estado | [Riverpod](https://riverpod.dev) |
+| Navegação | [go_router](https://pub.dev/packages/go_router) |
+| Backend | [Firebase](https://firebase.google.com) — Authentication, Firestore, Storage, Cloud Functions |
+| Identificação do pet | QR code ([qr_flutter](https://pub.dev/packages/qr_flutter)) |
 
-## Documentação
+## Estrutura do projeto
 
-Toda a documentação do projeto está em [`docs/`](docs/):
+Organização **feature-first** — cada funcionalidade tem suas próprias camadas de `data`, `domain` e `presentation`, sem uma pasta `screens/` genérica misturando tudo:
 
-- [Requisitos funcionais](docs/requisitos-funcionais.md)
-- [Requisitos não funcionais](docs/requisitos-nao-funcionais.md)
-- [Casos de teste](docs/casos-de-teste.md)
-- [Segurança](docs/seguranca.md)
-- [Arquitetura](docs/arquitetura.md)
-- [Modelo de dados (Firestore)](docs/modelo-dados-firestore.md)
-- Diagramas: [caso de uso](docs/diagramas/caso-de-uso.md) · [sequência](docs/diagramas/sequencia.md) · [classes](docs/diagramas/classes.md)
+```
+lib/
+├── core/            # tema, constantes, tratamento de erro e widgets compartilhados
+├── features/
+│   ├── auth/        # telas de login, cadastro, recuperação de senha
+│   ├── usuario/      # conta do tutor (dados, providers de autenticação)
+│   └── pet/          # perfil, carteira de vacina, histórico médico (em construção)
+└── routing/          # configuração central do go_router
+```
 
-Fluxo de contribuição (branches, commits, PRs): [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Detalhes e justificativa em [`docs/arquitetura.md`](docs/arquitetura.md).
 
 ## Como rodar
 
@@ -31,8 +87,37 @@ flutter pub get
 flutter run
 ```
 
-O projeto Firebase (`pet-connect-c53f1`) já existe, com as coleções `Usuarios`, `Pets` e `Localizacoes` em uso. Falta rodar [`flutterfire configure`](https://firebase.flutter.dev/docs/cli) para conectar este código Flutter a esse projeto (gera `firebase_options.dart`, não commitado — ver `.gitignore`).
+O projeto Firebase (`pet-connect-c53f1`) já existe, com as coleções `Usuarios`, `Pets` e `Localizacoes` em uso. É necessário rodar [`flutterfire configure`](https://firebase.flutter.dev/docs/cli) para conectar seu ambiente local a esse projeto — o comando gera `lib/firebase_options.dart`, que **não é versionado** (ver `.gitignore`) por conter identificadores do projeto Firebase.
 
-## Status
+### Rodando os testes
 
-Estrutura de pastas, documentação e modelo de dados reconciliados com o Firestore existente. Tela de login implementada seguindo o layout visual definido. Próximos passos: conectar ao Firebase (`flutterfire configure`), autenticação real, cadastro/gestão de pets.
+```bash
+flutter test
+```
+
+## Documentação
+
+Toda a documentação detalhada do projeto está em [`docs/`](docs/):
+
+- [Requisitos funcionais](docs/requisitos-funcionais.md)
+- [Requisitos não funcionais](docs/requisitos-nao-funcionais.md)
+- [Casos de teste](docs/casos-de-teste.md)
+- [Segurança](docs/seguranca.md)
+- [Arquitetura](docs/arquitetura.md)
+- [Modelo de dados (Firestore)](docs/modelo-dados-firestore.md)
+- Diagramas: [caso de uso](docs/diagramas/caso-de-uso.md) · [sequência](docs/diagramas/sequencia.md) · [classes](docs/diagramas/classes.md)
+
+## Contribuindo
+
+Fluxo de branches, convenção de commits e checklist de Pull Request estão descritos em [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Roadmap
+
+Ordem planejada para as próximas entregas, uma feature por Pull Request:
+
+1. 🐶 Gestão de pets (RF10–RF15)
+2. 🔗 QR code de identificação (RF16–RF19)
+3. 💉 Carteira de vacina (RF20–RF23)
+4. 🩺 Histórico médico (RF24–RF26)
+5. 📅 Agendamento de consultas (RF27–RF30)
+6. 📍 Localização (RF31–RF32, escopo a confirmar)
