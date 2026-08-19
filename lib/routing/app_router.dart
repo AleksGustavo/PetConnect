@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/cadastro_screen.dart';
 import '../features/auth/presentation/screens/esqueci_senha_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/pet/domain/consulta.dart';
 import '../features/pet/domain/historico_medico.dart';
 import '../features/pet/domain/pet.dart';
@@ -32,8 +33,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/',
     redirect: (context, state) {
+      // A splash cuida da própria navegação (aguarda a sessão resolver +
+      // tempo mínimo de exibição) — o redirect não deve interferir nela.
+      if (state.matchedLocation == '/') return null;
       if (authState.isLoading) return null;
 
       final isLoggedIn = authState.valueOrNull != null;
@@ -44,6 +48,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),

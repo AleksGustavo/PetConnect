@@ -47,6 +47,11 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: PetConnectApp()));
     await tester.pumpAndSettle();
 
+    // Abre na splash (tempo mínimo de exibição de 2,5s) antes de decidir
+    // entre login/Home — avança o relógio para além desse tempo.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
     expect(find.text('Login'), findsOneWidget, reason: 'deveria abrir na tela de login');
 
     await tester.tap(find.text('Cadastre-se'));
