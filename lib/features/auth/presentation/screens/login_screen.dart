@@ -85,21 +85,10 @@ class _Header extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            width: 140,
-            height: 140,
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-            ),
-            // TODO(design): substituir pelo ícone/ilustração real do
-            // PetConnect (cachorro + gato em formato de pin) quando o
-            // asset for exportado do layout.
-            child: const Icon(
-              Icons.pets,
-              size: 72,
-              color: AppColors.brandDark,
-            ),
+          Image.asset(
+            'assets/images/logo.png',
+            width: 160,
+            height: 160,
           ),
           const SizedBox(height: 24),
           const Text(
