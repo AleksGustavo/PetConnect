@@ -51,7 +51,7 @@ Como qualquer pessoa (sem login) precisa conseguir ver informações básicas de
 ## Validação de entrada
 
 - Todo formulário (cadastro, criação de pet, vacina, histórico, consulta) valida no client antes de enviar, **e** as regras do Firestore validam tipo/presença dos campos obrigatórios no servidor — nunca confiar somente na validação do app.
-- Uploads de imagem (foto de pet) devem ter limite de tamanho e tipo de arquivo validados antes do upload ao Firebase Storage.
+- Uploads de imagem (foto de pet, tutor, anexos) têm limite de tamanho (5MB) validado no client antes do envio ao Cloudinary — ver `core/config/cloudinary_config.dart`. O upload usa um preset "unsigned" (sem API secret embutida no app); exclusão de arquivo antigo não é feita (exigiria uma requisição assinada, que precisaria de um backend próprio para não expor o secret) — arquivo substituído/removido fica órfão no Cloudinary, limitação aceita conscientemente.
 
 ## Dados sensíveis e LGPD
 

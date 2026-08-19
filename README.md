@@ -60,7 +60,8 @@ Veja a lista completa de requisitos em [`docs/requisitos-funcionais.md`](docs/re
 | App mobile | [Flutter](https://flutter.dev) (Android + iOS) |
 | Estado | [Riverpod](https://riverpod.dev) |
 | Navegação | [go_router](https://pub.dev/packages/go_router) |
-| Backend | [Firebase](https://firebase.google.com) — Authentication, Firestore, Storage, Cloud Functions |
+| Backend | [Firebase](https://firebase.google.com) — Authentication, Firestore, Cloud Functions |
+| Upload de imagens | [Cloudinary](https://cloudinary.com) (não Firebase Storage — exige plano pago) |
 | Identificação do pet | QR code ([qr_flutter](https://pub.dev/packages/qr_flutter)) |
 
 ## Estrutura do projeto
@@ -89,6 +90,8 @@ flutter run
 ```
 
 O projeto Firebase (`pet-connect-c53f1`) já existe, com as coleções `Usuarios`, `Pets` e `Localizacoes` em uso. É necessário rodar [`flutterfire configure`](https://firebase.flutter.dev/docs/cli) para conectar seu ambiente local a esse projeto — o comando gera `lib/firebase_options.dart`, que **não é versionado** (ver `.gitignore`) por conter identificadores do projeto Firebase.
+
+Upload de fotos (pet, tutor, anexos) usa o Cloudinary, não o Firebase Storage. Configure uma conta gratuita e preencha `lib/core/config/cloudinary_config.dart` — instruções no próprio arquivo.
 
 ### Rodando os testes
 
