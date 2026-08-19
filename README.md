@@ -44,7 +44,8 @@ Além disso, centraliza para o tutor:
 | Login social (Google / Facebook) | ⬜ Não iniciado | RF04-A, RF04-B |
 | Edição/exclusão da conta do tutor | ⬜ Não iniciado | RF08–RF09 |
 | Gestão de pets (cadastro, listagem, edição, exclusão) | ✅ Concluído | RF10–RF15 |
-| QR code de identificação + página pública | ⬜ Não iniciado | RF16–RF19 |
+| QR code de identificação (exibido no app) | ✅ Concluído | RF16 |
+| Página pública do QR code + regeneração | ⬜ Não iniciado | RF17–RF19 |
 | Carteira de vacina | ⬜ Não iniciado | RF20–RF23 |
 | Histórico médico | ⬜ Não iniciado | RF24–RF26 |
 | Agendamento de consultas | ⬜ Não iniciado | RF27–RF30 |
@@ -116,7 +117,7 @@ Fluxo de branches, convenção de commits e checklist de Pull Request estão des
 Ordem planejada para as próximas entregas, uma feature por Pull Request:
 
 1. ✅ ~~Gestão de pets (RF10–RF15)~~
-2. 🔗 QR code de identificação (RF16–RF19)
+2. 🔗 QR code: ✅ ~~geração no app (RF16)~~ · página pública + regeneração (RF17–RF19) pendente
 3. 💉 Carteira de vacina (RF20–RF23)
 4. 🩺 Histórico médico (RF24–RF26)
 5. 📅 Agendamento de consultas (RF27–RF30)
