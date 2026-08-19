@@ -42,13 +42,13 @@ Além disso, centraliza para o tutor:
 | Sessão persistida + rotas protegidas | ✅ Concluído | RF06 |
 | Logout | ✅ Concluído | RF07 |
 | Login social (Google / Facebook) | ⬜ Não iniciado | RF04-A, RF04-B |
-| Edição/exclusão da conta do tutor | ⬜ Não iniciado | RF08–RF09 |
+| Edição/exclusão da conta do tutor (nome, sobrenome, telefone, nascimento, gênero, foto) | ✅ Concluído | RF08–RF09 |
 | Gestão de pets (cadastro, listagem, edição, exclusão) | ✅ Concluído | RF10–RF15 |
 | QR code de identificação (exibido no app) | ✅ Concluído | RF16 |
 | Página pública do QR code + regeneração | ⬜ Não iniciado | RF17–RF19 |
 | Carteira de vacina (registro, listagem, edição, exclusão, alerta visual) | ✅ Concluído | RF20–RF23 |
-| Histórico médico (com anexos no Firebase Storage) | ✅ Concluído | RF24–RF26 |
-| Agendamento de consultas | ⬜ Não iniciado | RF27–RF30 |
+| Histórico médico (com anexos no Cloudinary) | ✅ Concluído | RF24–RF26 |
+| Agendamento de consultas (agendar, listar por status, cancelar, marcar realizada, alerta visual) | ✅ Concluído | RF27–RF30 |
 | Localização (a confirmar) | ⬜ Proposto | RF31–RF32 |
 
 Veja a lista completa de requisitos em [`docs/requisitos-funcionais.md`](docs/requisitos-funcionais.md).
@@ -123,5 +123,5 @@ Ordem planejada para as próximas entregas, uma feature por Pull Request:
 2. 🔗 QR code: ✅ ~~geração no app (RF16)~~ · página pública + regeneração (RF17–RF19) pendente
 3. ✅ ~~Carteira de vacina (RF20–RF23)~~
 4. ✅ ~~Histórico médico (RF24–RF26)~~
-5. 📅 Agendamento de consultas (RF27–RF30)
+5. ✅ ~~Agendamento de consultas (RF27–RF30)~~
 6. 📍 Localização (RF31–RF32, escopo a confirmar)
